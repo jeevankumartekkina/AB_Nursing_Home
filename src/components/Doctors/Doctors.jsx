@@ -8,7 +8,7 @@ const Doctors = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/doctors');
+        const res = await fetch('/api/doctors');
         if (res.ok) {
           const data = await res.json();
           setDoctors(data);

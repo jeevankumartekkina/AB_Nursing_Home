@@ -7,7 +7,7 @@ const Gallery = () => {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/gallery');
+        const res = await fetch('/api/gallery');
         if (res.ok) {
           const data = await res.json();
           setImages(data);

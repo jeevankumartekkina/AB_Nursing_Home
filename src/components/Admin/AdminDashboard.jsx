@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut } from 'lucide-react';
 import './AdminDashboard.css';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = '/api';
 
 const AdminDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('appointments');
