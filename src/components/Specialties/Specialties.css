@@ -1,0 +1,96 @@
+.specialties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
+  justify-content: center;
+}
+
+.specialty-card {
+  background-color: var(--bg-white);
+  padding: 3rem 2.5rem;
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  text-align: left;
+  border: 1px solid rgba(0,0,0,0.03);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.specialty-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  z-index: 2;
+}
+
+.specialty-card:hover::before {
+  transform: scaleX(1);
+}
+
+.specialty-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-xl), var(--glow-primary);
+}
+
+.specialty-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, var(--bg-main), #e2e8f0);
+  color: var(--primary);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  transition: var(--transition);
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.specialty-card:hover .specialty-icon-wrapper {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: var(--text-white);
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: var(--glow-primary);
+}
+
+.specialty-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+}
+
+.specialty-desc {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.specialty-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--primary);
+}
+
+.specialty-link span {
+  transition: transform 0.3s ease;
+}
+
+.specialty-link:hover span {
+  transform: translateX(5px);
+}

@@ -1,0 +1,215 @@
+.appointment-section {
+  background-color: var(--primary);
+  padding: 0;
+}
+
+.appointment-wrapper {
+  display: flex;
+  min-height: 500px;
+}
+
+.appointment-info {
+  flex: 1;
+  padding: 5rem 3rem 5rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.appointment-info .title {
+  color: var(--text-white);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.text-white {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.info-box {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--secondary);
+  color: var(--text-white);
+}
+
+.info-box h3 {
+  color: var(--text-white);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.25rem;
+}
+
+.info-box p {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 1rem;
+}
+
+.appointment-form-container {
+  flex: 1;
+  background-color: var(--bg-white);
+  padding: 4rem;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+}
+
+.appointment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper.align-start {
+  align-items: flex-start;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-light);
+}
+
+.textarea-icon {
+  top: 1rem;
+}
+
+.input-wrapper input,
+.input-wrapper textarea {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 3rem;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--border-radius);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  transition: var(--transition);
+  background-color: #f9fafb;
+}
+
+.input-wrapper input:focus,
+.input-wrapper textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: var(--bg-white);
+  box-shadow: 0 0 0 3px rgba(0, 96, 100, 0.1);
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--border-radius);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  background-color: #f9fafb;
+  cursor: pointer;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .appointment-wrapper {
+    flex-direction: column;
+  }
+  
+  .appointment-info {
+    padding: 3rem 2rem;
+  }
+  
+  .appointment-form-container {
+    padding: 3rem 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Toast Notification Styles */
+.toast-notification {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  background: white;
+  border-left: 4px solid #25D366; /* Success green */
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-xl);
+  padding: 1rem 1.5rem;
+  z-index: 9999;
+  transform: translateX(150%);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.toast-notification.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.toast-icon {
+  background: #25D366;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.toast-message h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+
+.toast-message p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+@media (max-width: 768px) {
+  .toast-notification {
+    top: 20px;
+    right: 20px;
+    left: 20px;
+    transform: translateY(-150%);
+  }
+  .toast-notification.show {
+    transform: translateY(0);
+  }
+}

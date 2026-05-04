@@ -1,0 +1,92 @@
+.facilities-section {
+  position: relative;
+}
+
+.facilities-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.facility-item {
+  width: calc(33.333% - 1.33rem);
+  min-width: 250px;
+  background-color: var(--bg-main);
+  border-radius: var(--border-radius-xl);
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: var(--transition);
+  border: 1px solid rgba(0,0,0,0.02);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Make some items wider to create a masonry-like feel */
+.facility-item:nth-child(1),
+.facility-item:nth-child(2) {
+  width: calc(50% - 1rem);
+}
+
+.facility-item:hover {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl), var(--glow-primary);
+  border-color: transparent;
+}
+
+.facility-icon {
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  transition: var(--transition);
+}
+
+.facility-item:hover .facility-icon {
+  color: var(--text-white);
+  transform: scale(1.1);
+}
+
+.facility-item h4 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  margin: 0;
+  transition: var(--transition);
+  color: var(--text-dark);
+}
+
+.facility-item:hover h4 {
+  color: var(--text-white);
+}
+
+.facility-bg-icon {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  opacity: 0.03;
+  transform: scale(4);
+  z-index: -1;
+  transition: var(--transition);
+  color: var(--text-dark);
+}
+
+.facility-item:hover .facility-bg-icon {
+  opacity: 0.1;
+  color: var(--text-white);
+  transform: scale(4.5) rotate(10deg);
+}
+
+@media (max-width: 992px) {
+  .facility-item,
+  .facility-item:nth-child(1),
+  .facility-item:nth-child(2) {
+    width: calc(50% - 1rem);
+  }
+}
+@media (max-width: 640px) {
+  .facility-item,
+  .facility-item:nth-child(1),
+  .facility-item:nth-child(2) {
+    width: 100%;
+  }
+}

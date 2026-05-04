@@ -1,0 +1,31 @@
+.insurance-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.insurance-card {
+  padding: 2rem;
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  filter: grayscale(100%) opacity(0.7);
+  background: white;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.insurance-card:hover {
+  filter: grayscale(0%) opacity(1);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.insurance-logo {
+  max-width: 150px;
+  height: auto;
+  object-fit: contain;
+}

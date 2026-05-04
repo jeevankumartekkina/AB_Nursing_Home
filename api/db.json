@@ -1,0 +1,56 @@
+{
+  "doctors": [
+    {
+      "id": "1",
+      "name": "Dr. Archana Bhaskara",
+      "specialty": "Chief Gynecologist & Obstetrician",
+      "qualification": "MBBS, MD, DGO",
+      "experience": "20+ Years Experience",
+      "image": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "2",
+      "name": "Dr. Support Staff",
+      "specialty": "Pediatrician",
+      "qualification": "MBBS, MD (Pediatrics)",
+      "experience": "10+ Years Experience",
+      "image": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "1",
+      "author": "Swarna latha",
+      "text": "Very nice doctor and staff is very good Good service",
+      "rating": 5,
+      "time": "a year ago"
+    },
+    {
+      "id": "2",
+      "author": "Madhu Reddi",
+      "text": "Very nice staff and excellent service given by them",
+      "rating": 5,
+      "time": "a year ago"
+    },
+    {
+      "id": "3",
+      "author": "Umamashwari Emandhi",
+      "text": "Excellent service and obedient staff..",
+      "rating": 5,
+      "time": "a year ago"
+    }
+  ],
+  "appointments": [],
+  "gallery": [
+    {
+      "id": "1",
+      "url": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80",
+      "caption": "Modern Hospital Exterior"
+    },
+    {
+      "id": "2",
+      "url": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=800&q=80",
+      "caption": "Advanced OT"
+    }
+  ]
+}
