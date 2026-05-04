@@ -80,6 +80,7 @@
   position: absolute;
   left: 1rem;
   color: var(--text-light);
+  pointer-events: none;
 }
 
 .textarea-icon {
