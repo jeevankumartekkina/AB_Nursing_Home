@@ -28,11 +28,7 @@ const Navbar = () => {
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="container navbar-container">
         <a href="#home" className="navbar-logo">
-          <span className="logo-icon">AB</span>
-          <div className="logo-text">
-            <h2>Archana Bhaskara</h2>
-            <p>Nursing Home</p>
-          </div>
+          <img src="/logo.png" alt="Archana Bhaskara Nursing Home" className="hospital-logo" />
         </a>
 
         <div className={`navbar-links ${isMobileMenuOpen ? 'active' : ''}`}>

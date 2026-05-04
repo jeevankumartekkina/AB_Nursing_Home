@@ -35,32 +35,15 @@
   color: var(--primary-dark);
 }
 
-.navbar-logo .logo-icon {
-  background-color: var(--secondary);
-  color: var(--text-white);
-  font-weight: 700;
-  font-size: 1.25rem;
-  width: 45px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+.hospital-logo {
+  height: 50px; /* Adjust this number to make the logo bigger or smaller */
+  width: auto;
+  object-fit: contain;
+  transition: var(--transition);
 }
 
-.navbar-logo .logo-text h2 {
-  font-size: 1.25rem;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.navbar-logo .logo-text p {
-  font-size: 0.75rem;
-  margin: 0;
-  color: var(--primary);
-  font-weight: 500;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+.navbar.scrolled .hospital-logo {
+  height: 40px; /* Shrinks slightly when scrolling down */
 }
 
 .navbar-links {
