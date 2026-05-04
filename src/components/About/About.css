@@ -158,18 +158,30 @@
 }
 
 @media (max-width: 768px) {
+  .about-section {
+    padding-top: 5rem;
+  }
   .about-image-wrapper {
     padding: 0;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }
   .about-img {
-    height: 400px;
+    height: 350px;
   }
   .experience-badge {
-    right: 10px;
-    left: 10px;
-    bottom: -30px;
+    right: 0;
+    left: 0;
+    bottom: -20px;
     justify-content: center;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .experience-badge .years {
+    font-size: 1.5rem;
+  }
+  .feature-item {
+    padding: 1rem;
+    gap: 1rem;
   }
   .feature-item:hover {
     transform: none;

@@ -215,14 +215,22 @@ img {
 .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1.25rem;
+  }
   .grid-cols-2, .grid-cols-3 {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   .section {
     padding: 4rem 0;
   }
   .section-title {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
+  }
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
   }
 }
 
