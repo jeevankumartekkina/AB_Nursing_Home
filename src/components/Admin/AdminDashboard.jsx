@@ -34,7 +34,7 @@ const AdminDashboard = ({ onLogout }) => {
   const [editingInsuranceId, setEditingInsuranceId] = useState(null);
 
   useEffect(() => {
-    const auth = localStorage.getItem('adminAuth');
+    const auth = sessionStorage.getItem('adminAuth');
     if (auth === 'true') setIsLoggedIn(true);
   }, []);
 
@@ -76,7 +76,7 @@ const AdminDashboard = ({ onLogout }) => {
       const data = await res.json();
       if (data.success) {
         setIsLoggedIn(true);
-        localStorage.setItem('adminAuth', 'true');
+        sessionStorage.setItem('adminAuth', 'true');
         setLoginError('');
       } else {
         setLoginError('Invalid password. Please try again.');
@@ -89,7 +89,7 @@ const AdminDashboard = ({ onLogout }) => {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setPassword(''); // Clear the password field
-    localStorage.removeItem('adminAuth');
+    sessionStorage.removeItem('adminAuth');
     if (onLogout) onLogout();
   };
 
