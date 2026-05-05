@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 
 // Components
@@ -16,10 +17,9 @@ import AppointmentForm from './components/AppointmentForm/AppointmentForm';
 import FAQ from './components/FAQ/FAQ';
 import Contact from './components/Contact/Contact';
 import Footer from './components/Footer/Footer';
-import FAB from './components/FAB/FAB';
+import FloatingCallButton from './components/FAB/FloatingCallButton';
 
 // Admin Components
-import AdminLogin from './components/Admin/AdminLogin';
 import AdminDashboard from './components/Admin/AdminDashboard';
 
 const MainSite = () => {
@@ -59,28 +59,18 @@ const MainSite = () => {
         <Contact />
       </main>
       <Footer />
-      <FAB />
+      <FloatingCallButton />
+      <Analytics />
     </div>
   );
 };
 
 function App() {
-  const [isAdminAuth, setIsAdminAuth] = useState(false);
-
   return (
     <Router>
       <Routes>
-        {/* Main Website Route */}
         <Route path="/" element={<MainSite />} />
-        
-        {/* Admin Routes */}
-        <Route path="/admin" element={
-          isAdminAuth ? 
-            <AdminDashboard onLogout={() => setIsAdminAuth(false)} /> : 
-            <AdminLogin onLogin={() => setIsAdminAuth(true)} />
-        } />
-        
-        {/* Fallback */}
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

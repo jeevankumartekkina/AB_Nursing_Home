@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,19 @@ mongoose.connect(MONGODB_URI)
         { name: "Religare", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Religare" }
       ]);
       console.log('Seeded initial insurances.');
+    }
+
+    // Seed initial settings
+    const settingsCount = await Settings.countDocuments();
+    if (settingsCount === 0) {
+      await Settings.create({
+        notificationEmail: '',
+        adminPassword: 'admin123',
+        contactPhone: '09573687858',
+        senderEmail: '',
+        senderAppPassword: ''
+      });
+      console.log('Seeded initial settings.');
     }
   })
   .catch(err => console.error('MongoDB connection error:', err));
@@ -98,8 +112,53 @@ const insuranceSchema = new mongoose.Schema({
 insuranceSchema.set('toJSON', { virtuals: true });
 const Insurance = mongoose.model('Insurance', insuranceSchema);
 
+const settingsSchema = new mongoose.Schema({
+  notificationEmail: String,
+  adminPassword: { type: String, default: 'admin123' },
+  contactPhone: { type: String, default: '09573687858' },
+  senderEmail: String,
+  senderAppPassword: String
+});
+settingsSchema.set('toJSON', { virtuals: true });
+const Settings = mongoose.model('Settings', settingsSchema);
+
 
 // --- API ENDPOINTS ---
+
+// AUTH
+app.post('/api/login', async (req, res) => {
+  try {
+    const { password } = req.body;
+    const settings = await Settings.findOne();
+    if (settings && settings.adminPassword === password) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false, message: 'Invalid password' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// SETTINGS
+app.get('/api/settings', async (req, res) => {
+  try {
+    const settings = await Settings.findOne();
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/settings', async (req, res) => {
+  try {
+    const updatedSettings = await Settings.findOneAndUpdate({}, req.body, { new: true, upsert: true });
+    res.json(updatedSettings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // INSURANCES
 app.get('/api/insurance', async (req, res) => {
   try {
@@ -228,8 +287,39 @@ app.post('/api/appointments', async (req, res) => {
   try {
     const newAppt = new Appointment(req.body);
     await newAppt.save();
+
+    // Trigger Email Notification
+    const settings = await Settings.findOne();
+    if (settings && settings.notificationEmail && settings.senderEmail && settings.senderAppPassword) {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: settings.senderEmail,
+          pass: settings.senderAppPassword
+        }
+      });
+
+      const mailOptions = {
+        from: `"Hospital Alert" <${settings.senderEmail}>`,
+        to: settings.notificationEmail,
+        subject: `New Appointment: ${newAppt.name}`,
+        text: `New appointment request received!
+        
+        Name: ${newAppt.name}
+        Phone: ${newAppt.phone}
+        Date: ${newAppt.date}
+        Department: ${newAppt.department}
+        Message: ${newAppt.message}
+        
+        View details in your dashboard: https://archana-hospital.vercel.app/admin`
+      };
+
+      await transporter.sendMail(mailOptions);
+    }
+
     res.status(201).json(newAppt);
   } catch (err) {
+    console.error("Error in appointment/email:", err);
     res.status(500).json({ error: err.message });
   }
 });
