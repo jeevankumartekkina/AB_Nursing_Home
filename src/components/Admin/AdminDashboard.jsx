@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2, Settings, Lock, Mail, Phone, Image as ImageIcon, ShieldCheck } from 'lucide-react';
+import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2, Settings, Lock, Mail, Phone, Image as ImageIcon, ShieldCheck, Download, Filter, X } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import './AdminDashboard.css';
 
 const API_URL = '/api';
@@ -11,6 +12,8 @@ const AdminDashboard = ({ onLogout }) => {
 
   const [activeTab, setActiveTab] = useState('appointments');
   const [appointments, setAppointments] = useState([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportDates, setExportDates] = useState({ start: '', end: '' });
   const [doctors, setDoctors] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [gallery, setGallery] = useState([]);
@@ -202,6 +205,42 @@ const AdminDashboard = ({ onLogout }) => {
     } catch (err) { console.error(err); }
   };
 
+  const handleExportExcel = () => {
+    let filtered = [...appointments];
+    
+    if (exportDates.start) {
+      const start = new Date(exportDates.start);
+      filtered = filtered.filter(a => new Date(a.createdAt) >= start);
+    }
+    
+    if (exportDates.end) {
+      const end = new Date(exportDates.end);
+      end.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(a => new Date(a.createdAt) <= end);
+    }
+
+    if (filtered.length === 0) {
+      alert("No appointments found in this date range.");
+      return;
+    }
+
+    const dataToExport = filtered.map(a => ({
+      "Requested Date": new Date(a.createdAt).toLocaleString(),
+      "Patient Name": a.name,
+      "Phone": a.phone,
+      "Appointment Date": a.date,
+      "Department": a.department,
+      "Status": a.status,
+      "Message": a.message
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Appointments");
+    XLSX.writeFile(wb, `Hospital_Appointments_${new Date().toISOString().split('T')[0]}.xlsx`);
+    setShowExportModal(false);
+  };
+
   const pendingAppointments = appointments.filter(a => a.status === 'pending');
   const completedAppointments = appointments.filter(a => a.status === 'completed');
   const [appointmentView, setAppointmentView] = useState('pending');
@@ -244,13 +283,48 @@ const AdminDashboard = ({ onLogout }) => {
         {/* APPOINTMENTS */}
         {activeTab === 'appointments' && (
           <div>
-            <div className="admin-header flex justify-between">
+            <div className="admin-header flex justify-between align-center">
               <h2>Appointments</h2>
-              <div className="flex gap-2">
-                <button className={`btn ${appointmentView === 'pending' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setAppointmentView('pending')}>Pending ({pendingAppointments.length})</button>
-                <button className={`btn ${appointmentView === 'completed' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setAppointmentView('completed')}>History</button>
+              <div className="flex gap-2 align-center">
+                <button 
+                  className="btn btn-outline flex align-center gap-2" 
+                  onClick={() => setShowExportModal(true)}
+                  style={{ borderColor: 'var(--admin-primary)', color: 'var(--admin-primary)' }}
+                >
+                  <Download size={18}/> Export Excel
+                </button>
+                <div className="flex gap-2 ml-4" style={{ marginLeft: '1rem', borderLeft: '1px solid #ddd', paddingLeft: '1rem' }}>
+                  <button className={`btn ${appointmentView === 'pending' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setAppointmentView('pending')}>Pending ({pendingAppointments.length})</button>
+                  <button className={`btn ${appointmentView === 'completed' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setAppointmentView('completed')}>History</button>
+                </div>
               </div>
             </div>
+
+            {showExportModal && (
+              <div className="export-modal-overlay">
+                <div className="export-modal glass-panel p-4">
+                  <div className="flex justify-between align-center mb-4">
+                    <h3>Export Appointments</h3>
+                    <button className="btn-icon" onClick={() => setShowExportModal(false)}><X size={20}/></button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="form-label">From Date</label>
+                      <input type="date" className="form-control" value={exportDates.start} onChange={e => setExportDates({...exportDates, start: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="form-label">To Date</label>
+                      <input type="date" className="form-control" value={exportDates.end} onChange={e => setExportDates({...exportDates, end: e.target.value})} />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="btn btn-primary w-100" onClick={handleExportExcel}>Download Excel Report</button>
+                    <button className="btn btn-outline w-100" onClick={() => { setExportDates({start:'', end:''}); handleExportExcel(); }}>Export All</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="admin-table-container glass-panel mt-4">
               <table className="admin-table">
                 <thead><tr><th>Patient</th><th>Phone</th><th>Date</th><th>Dept</th><th>Message</th>{appointmentView === 'pending' && <th>Action</th>}</tr></thead>
