@@ -140,7 +140,14 @@ app.use(express.static(path.join(__dirname, '../dist')));
 // Auth Middleware to protect admin routes
 const authenticate = async (req, res, next) => {
   const token = req.headers['authorization'];
-  const settings = await Settings.findOne();
+  let settings = await Settings.findOne();
+  
+  // Auto-fix for existing users: If token is missing in DB, create one
+  if (settings && !settings.adminToken) {
+    settings.adminToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    await settings.save();
+  }
+
   if (settings && settings.adminToken === token) {
     next();
   } else {
@@ -155,8 +162,13 @@ app.post('/api/login', async (req, res) => {
       await Settings.findOneAndUpdate({}, { adminPassword: 'admin123' });
       return res.json({ success: true, message: 'Password reset to admin123' });
     }
-    const settings = await Settings.findOne();
+    let settings = await Settings.findOne();
     if (settings && settings.adminPassword === password) {
+      // Auto-fix for existing users: Ensure token exists before returning
+      if (!settings.adminToken) {
+        settings.adminToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        await settings.save();
+      }
       res.json({ success: true, token: settings.adminToken });
     } else {
       res.status(401).json({ success: false, message: 'Invalid password' });
