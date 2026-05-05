@@ -18,6 +18,7 @@ const AdminDashboard = ({ onLogout }) => {
   const [reviews, setReviews] = useState([]);
   const [gallery, setGallery] = useState([]);
   const [insurances, setInsurances] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [siteSettings, setSiteSettings] = useState({
     notificationEmail: '',
     adminPassword: '',
@@ -27,6 +28,7 @@ const AdminDashboard = ({ onLogout }) => {
   });
   
   // Form States
+  const [newDepartment, setNewDepartment] = useState({ name: '' });
   const [newDoctor, setNewDoctor] = useState({ name: '', specialty: '', qualification: '', experience: '', image: '' });
   const [editingDoctorId, setEditingDoctorId] = useState(null);
   const [newImage, setNewImage] = useState({ url: '', caption: '' });
@@ -49,13 +51,14 @@ const AdminDashboard = ({ onLogout }) => {
 
   const fetchData = async () => {
     try {
-      const [appRes, docRes, revRes, galRes, insRes, setRes] = await Promise.all([
+      const [appRes, docRes, revRes, galRes, insRes, setRes, deptRes] = await Promise.all([
         fetch(`${API_URL}/appointments`),
         fetch(`${API_URL}/doctors`),
         fetch(`${API_URL}/reviews`),
         fetch(`${API_URL}/gallery`),
         fetch(`${API_URL}/insurance`),
-        fetch(`${API_URL}/settings`)
+        fetch(`${API_URL}/settings`),
+        fetch(`${API_URL}/departments`)
       ]);
       setAppointments(await appRes.json());
       setDoctors(await docRes.json());
@@ -63,6 +66,7 @@ const AdminDashboard = ({ onLogout }) => {
       setGallery(await galRes.json());
       setInsurances(await insRes.json());
       setSiteSettings(await setRes.json());
+      setDepartments(await deptRes.json());
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -189,8 +193,23 @@ const AdminDashboard = ({ onLogout }) => {
   const handleDelete = async (type, id) => {
     if (!window.confirm(`Are you sure you want to remove this ${type}?`)) return;
     try {
-      await fetch(`${API_URL}/${type === 'insurance' ? 'insurance' : type}/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/${type === 'insurance' ? 'insurance' : (type === 'departments' ? 'departments' : type)}/${id}`, { method: 'DELETE' });
       fetchData();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleAddDepartment = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/departments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDepartment)
+      });
+      if (res.ok) {
+        setNewDepartment({ name: '' });
+        fetchData();
+      }
     } catch (err) { console.error(err); }
   };
 
@@ -270,6 +289,7 @@ const AdminDashboard = ({ onLogout }) => {
         <div className="admin-logo"><h3>Admin Panel</h3></div>
         <ul className="admin-nav">
           <li className={activeTab === 'appointments' ? 'active' : ''} onClick={() => setActiveTab('appointments')}><Calendar size={20}/> <span>Appointments</span></li>
+          <li className={activeTab === 'departments' ? 'active' : ''} onClick={() => setActiveTab('departments')}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg> <span>Departments</span></li>
           <li className={activeTab === 'doctors' ? 'active' : ''} onClick={() => setActiveTab('doctors')}><Users size={20}/> <span>Doctors</span></li>
           <li className={activeTab === 'gallery' ? 'active' : ''} onClick={() => setActiveTab('gallery')}><ImageIcon size={20}/> <span>Gallery</span></li>
           <li className={activeTab === 'insurance' ? 'active' : ''} onClick={() => setActiveTab('insurance')}><ShieldCheck size={20}/> <span>Insurance</span></li>
@@ -338,6 +358,28 @@ const AdminDashboard = ({ onLogout }) => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* DEPARTMENTS */}
+        {activeTab === 'departments' && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="glass-panel p-4">
+              <h3>Add New Department</h3>
+              <form onSubmit={handleAddDepartment} className="mt-4">
+                <input type="text" placeholder="Department Name (e.g. Cardiology)" className="form-control mb-3" value={newDepartment.name} onChange={e => setNewDepartment({name: e.target.value})} required />
+                <button type="submit" className="btn btn-primary w-100">Add Department</button>
+              </form>
+            </div>
+            <div className="glass-panel p-4 overflow-auto">
+              <h3>Current Departments</h3>
+              {departments.map(dept => (
+                <div key={dept.id} className="admin-list-item mt-3">
+                  <strong>{dept.name}</strong>
+                  <button onClick={() => handleDelete('departments', dept.id)} className="btn-icon text-danger"><Trash2 size={18}/></button>
+                </div>
+              ))}
             </div>
           </div>
         )}

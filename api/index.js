@@ -55,6 +55,19 @@ mongoose.connect(MONGODB_URI)
       });
       console.log('Seeded initial settings.');
     }
+
+    // Seed initial departments
+    const deptCount = await Department.countDocuments();
+    if (deptCount === 0) {
+      await Department.insertMany([
+        { name: "General Medicine" },
+        { name: "Pediatrics" },
+        { name: "Orthopedics" },
+        { name: "Gynaecology" },
+        { name: "Dermatology" }
+      ]);
+      console.log('Seeded initial departments.');
+    }
   })
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -121,6 +134,12 @@ const settingsSchema = new mongoose.Schema({
 });
 settingsSchema.set('toJSON', { virtuals: true });
 const Settings = mongoose.model('Settings', settingsSchema);
+
+const departmentSchema = new mongoose.Schema({
+  name: String
+});
+departmentSchema.set('toJSON', { virtuals: true });
+const Department = mongoose.model('Department', departmentSchema);
 
 
 // --- API ENDPOINTS ---
@@ -198,6 +217,35 @@ app.put('/api/insurance/:id', async (req, res) => {
 app.delete('/api/insurance/:id', async (req, res) => {
   try {
     await Insurance.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DEPARTMENTS
+app.get('/api/departments', async (req, res) => {
+  try {
+    const depts = await Department.find();
+    res.json(depts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/departments', async (req, res) => {
+  try {
+    const newDept = new Department(req.body);
+    await newDept.save();
+    res.status(201).json(newDept);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/departments/:id', async (req, res) => {
+  try {
+    await Department.findByIdAndDelete(req.params.id);
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: err.message });

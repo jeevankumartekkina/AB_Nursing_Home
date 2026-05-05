@@ -7,10 +7,23 @@ const AppointmentForm = () => {
     name: '',
     phone: '',
     date: '',
-    department: 'Gynecology',
+    department: '',
     message: ''
   });
+  const [departments, setDepartments] = useState([]);
   const [showToast, setShowToast] = useState(false);
+
+  React.useEffect(() => {
+    fetch('/api/departments')
+      .then(res => res.json())
+      .then(data => {
+        setDepartments(data);
+        if (data.length > 0) {
+          setFormData(prev => ({ ...prev, department: data[0].name }));
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,7 +42,7 @@ const AppointmentForm = () => {
       if (res.ok) {
         setShowToast(true);
         setTimeout(() => setShowToast(false), 4000);
-        setFormData({ name: '', phone: '', date: '', department: 'Gynecology', message: '' });
+        setFormData({ name: '', phone: '', date: '', department: departments[0]?.name || '', message: '' });
       }
     } catch (error) {
       console.error('Error submitting appointment:', error);
@@ -80,11 +93,10 @@ const AppointmentForm = () => {
                 <div className="form-group">
                   <label>Department</label>
                   <select name="department" value={formData.department} onChange={handleChange} required className="form-select">
-                    <option value="Gynecology">Gynecology</option>
-                    <option value="Obstetrics">Obstetrics</option>
-                    <option value="Maternity">Maternity</option>
-                    <option value="Pediatrics">Pediatrics</option>
-                    <option value="General">General Care</option>
+                    {departments.map(dept => (
+                      <option key={dept.id} value={dept.name}>{dept.name}</option>
+                    ))}
+                    {departments.length === 0 && <option value="">Loading departments...</option>}
                   </select>
                 </div>
               </div>
