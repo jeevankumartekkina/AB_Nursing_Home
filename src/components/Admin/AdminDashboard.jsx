@@ -399,7 +399,7 @@ const AdminDashboard = ({ onLogout }) => {
                 <input type="email" className="form-control mb-3" value={siteSettings.senderEmail} onChange={e => setSiteSettings({...siteSettings, senderEmail: e.target.value})} />
                 <label className="form-label">Gmail App Password</label>
                 <input type="password" className="form-control mb-3" value={siteSettings.senderAppPassword} onChange={e => setSiteSettings({...siteSettings, senderAppPassword: e.target.value})} />
-                <div className="alert alert-info text-xs">Go to Google Account > Security > 2-Step Verification > App Passwords to get this.</div>
+                <div className="alert alert-info text-xs">Go to Google Account &gt; Security &gt; 2-Step Verification &gt; App Passwords to get this.</div>
               </div>
               <button type="submit" className="btn btn-primary px-5 col-span-2">Save All Settings</button>
             </form>
