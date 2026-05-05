@@ -1,16 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Insurance.css';
 
 const Insurance = () => {
-  // Placeholders for insurance logos
-  const insuranceProviders = [
-    { name: "Star Health", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Star+Health" },
-    { name: "Apollo Munich", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Apollo+Munich" },
-    { name: "HDFC ERGO", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=HDFC+ERGO" },
-    { name: "ICICI Lombard", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=ICICI+Lombard" },
-    { name: "Bajaj Allianz", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Bajaj+Allianz" },
-    { name: "Religare", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Religare" }
-  ];
+  const [insurances, setInsurances] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/insurance')
+      .then(res => res.json())
+      .then(data => setInsurances(data))
+      .catch(err => console.error("Error fetching insurances:", err));
+  }, []);
 
   return (
     <section id="insurance" className="section bg-white">
@@ -22,11 +21,15 @@ const Insurance = () => {
         </p>
 
         <div className="insurance-grid reveal delay-300">
-          {insuranceProviders.map((provider, index) => (
-            <div key={index} className="insurance-card glass-panel">
-              <img src={provider.logo} alt={provider.name} className="insurance-logo" />
-            </div>
-          ))}
+          {insurances.length === 0 ? (
+            <p>Loading insurances...</p>
+          ) : (
+            insurances.map((provider, index) => (
+              <div key={provider.id || index} className="insurance-card glass-panel">
+                <img src={provider.logo} alt={provider.name} className="insurance-logo" />
+              </div>
+            ))
+          )}
         </div>
       </div>
     </section>

@@ -77,8 +77,52 @@ const gallerySchema = new mongoose.Schema({
 gallerySchema.set('toJSON', { virtuals: true });
 const Gallery = mongoose.model('Gallery', gallerySchema);
 
+const insuranceSchema = new mongoose.Schema({
+  name: String,
+  logo: String
+});
+insuranceSchema.set('toJSON', { virtuals: true });
+const Insurance = mongoose.model('Insurance', insuranceSchema);
+
 
 // --- API ENDPOINTS ---
+// INSURANCES
+app.get('/api/insurance', async (req, res) => {
+  try {
+    const insurances = await Insurance.find();
+    res.json(insurances);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/insurance', async (req, res) => {
+  try {
+    const newInsurance = new Insurance(req.body);
+    await newInsurance.save();
+    res.status(201).json(newInsurance);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/insurance/:id', async (req, res) => {
+  try {
+    const updatedInsurance = await Insurance.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedInsurance);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/insurance/:id', async (req, res) => {
+  try {
+    await Insurance.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // DOCTORS
 app.get('/api/doctors', async (req, res) => {

@@ -10,6 +10,7 @@ const AdminDashboard = ({ onLogout }) => {
   const [doctors, setDoctors] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [gallery, setGallery] = useState([]);
+  const [insurances, setInsurances] = useState([]);
   
   // New Doctor Form State
   const [newDoctor, setNewDoctor] = useState({ name: '', specialty: '', qualification: '', experience: '', image: '' });
@@ -23,22 +24,28 @@ const AdminDashboard = ({ onLogout }) => {
   const [newReview, setNewReview] = useState({ author: '', text: '', rating: 5, time: '' });
   const [editingReviewId, setEditingReviewId] = useState(null);
 
+  // New Insurance Form State
+  const [newInsurance, setNewInsurance] = useState({ name: '', logo: '' });
+  const [editingInsuranceId, setEditingInsuranceId] = useState(null);
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const [appRes, docRes, revRes, galRes] = await Promise.all([
+      const [appRes, docRes, revRes, galRes, insRes] = await Promise.all([
         fetch(`${API_URL}/appointments`),
         fetch(`${API_URL}/doctors`),
         fetch(`${API_URL}/reviews`),
-        fetch(`${API_URL}/gallery`)
+        fetch(`${API_URL}/gallery`),
+        fetch(`${API_URL}/insurance`)
       ]);
       setAppointments(await appRes.json());
       setDoctors(await docRes.json());
       setReviews(await revRes.json());
       setGallery(await galRes.json());
+      setInsurances(await insRes.json());
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -193,6 +200,54 @@ const AdminDashboard = ({ onLogout }) => {
     }
   };
 
+  const handleAddInsurance = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingInsuranceId) {
+        const res = await fetch(`${API_URL}/insurance/${editingInsuranceId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newInsurance)
+        });
+        if (res.ok) {
+          setNewInsurance({ name: '', logo: '' });
+          setEditingInsuranceId(null);
+          fetchData();
+        }
+      } else {
+        const res = await fetch(`${API_URL}/insurance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newInsurance)
+        });
+        if (res.ok) {
+          setNewInsurance({ name: '', logo: '' });
+          fetchData();
+        }
+      }
+    } catch (error) {
+      console.error("Error saving insurance:", error);
+    }
+  };
+
+  const handleEditInsuranceClick = (ins) => {
+    setNewInsurance({
+      name: ins.name,
+      logo: ins.logo
+    });
+    setEditingInsuranceId(ins.id);
+  };
+
+  const handleDeleteInsurance = async (id) => {
+    if(!window.confirm("Are you sure you want to remove this insurance?")) return;
+    try {
+      await fetch(`${API_URL}/insurance/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting insurance:", error);
+    }
+  };
+
   const [appointmentView, setAppointmentView] = useState('pending');
 
   const handleUpdateStatus = async (id, status) => {
@@ -276,6 +331,9 @@ const AdminDashboard = ({ onLogout }) => {
           </li>
           <li className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}>
             <MessageSquare size={20}/> Reviews
+          </li>
+          <li className={activeTab === 'insurance' ? 'active' : ''} onClick={() => setActiveTab('insurance')}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg> Insurance
           </li>
         </ul>
         <div className="admin-logout" onClick={onLogout}>
@@ -480,6 +538,57 @@ const AdminDashboard = ({ onLogout }) => {
                       <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-start' }}>
                         <button onClick={() => handleEditReviewClick(rev)} className="btn-icon" style={{ color: 'var(--primary)' }} title="Edit"><Edit2 size={20}/></button>
                         <button onClick={() => handleDeleteReview(rev.id)} className="btn-icon text-danger" title="Delete"><Trash2 size={20}/></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* INSURANCE TAB */}
+        {activeTab === 'insurance' && (
+          <div>
+            <div className="admin-header">
+              <h2>Manage Insurance Partners</h2>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="glass-panel p-4">
+                <h3>{editingInsuranceId ? 'Edit Insurance' : 'Add New Insurance'}</h3>
+                <form onSubmit={handleAddInsurance} className="mt-4">
+                  <div className="form-group mb-3">
+                    <input type="text" placeholder="Insurance Name" className="form-control" value={newInsurance.name} onChange={e => setNewInsurance({...newInsurance, name: e.target.value})} required />
+                  </div>
+                  <div className="form-group mb-3">
+                    <input type="text" placeholder="Logo URL (e.g. https://...)" className="form-control" value={newInsurance.logo} onChange={e => setNewInsurance({...newInsurance, logo: e.target.value})} required />
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button type="submit" className="btn btn-primary w-100">
+                      {editingInsuranceId ? 'Update Insurance' : <><Plus size={18}/> Add Insurance</>}
+                    </button>
+                    {editingInsuranceId && (
+                      <button type="button" className="btn btn-outline w-100" onClick={() => { setEditingInsuranceId(null); setNewInsurance({ name: '', logo: '' }); }}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+
+              <div className="glass-panel p-4" style={{maxHeight: '600px', overflowY: 'auto'}}>
+                <h3>Current Partners</h3>
+                <div className="mt-4 flex flex-col gap-3">
+                  {insurances.map(ins => (
+                    <div key={ins.id} className="admin-list-item">
+                      <div className="flex align-center gap-3">
+                        <img src={ins.logo} alt={ins.name} style={{width: '100px', height: '40px', objectFit: 'contain', background: '#f8f9fa', padding: '5px', borderRadius: '4px'}} />
+                        <strong>{ins.name}</strong>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={() => handleEditInsuranceClick(ins)} className="btn-icon" style={{ color: 'var(--primary)' }} title="Edit"><Edit2 size={20}/></button>
+                        <button onClick={() => handleDeleteInsurance(ins.id)} className="btn-icon text-danger" title="Delete"><Trash2 size={20}/></button>
                       </div>
                     </div>
                   ))}
