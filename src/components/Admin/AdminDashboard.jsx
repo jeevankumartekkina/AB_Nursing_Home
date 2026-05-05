@@ -88,6 +88,7 @@ const AdminDashboard = ({ onLogout }) => {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setPassword(''); // Clear the password field
     localStorage.removeItem('adminAuth');
     if (onLogout) onLogout();
   };
