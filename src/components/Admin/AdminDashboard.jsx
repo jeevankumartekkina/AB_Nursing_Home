@@ -54,15 +54,16 @@ const AdminDashboard = ({ onLogout }) => {
   }, [isLoggedIn]);
 
   const fetchData = async () => {
+    const token = sessionStorage.getItem('adminToken');
     try {
       const [appRes, docRes, revRes, galRes, insRes, setRes, deptRes] = await Promise.all([
-        fetch(`${API_URL}/appointments`),
-        fetch(`${API_URL}/doctors`),
-        fetch(`${API_URL}/reviews`),
-        fetch(`${API_URL}/gallery`),
-        fetch(`${API_URL}/insurance`),
-        fetch(`${API_URL}/settings`),
-        fetch(`${API_URL}/departments`)
+        fetch(`${API_URL}/appointments`, { headers: { 'Authorization': token } }),
+        fetch(`${API_URL}/doctors`), // Public
+        fetch(`${API_URL}/reviews`), // Public
+        fetch(`${API_URL}/gallery`), // Public
+        fetch(`${API_URL}/insurance`), // Public
+        fetch(`${API_URL}/settings`, { headers: { 'Authorization': token } }),
+        fetch(`${API_URL}/departments`) // Public
       ]);
       setAppointments(await appRes.json());
       setDoctors(await docRes.json());
@@ -88,6 +89,7 @@ const AdminDashboard = ({ onLogout }) => {
       if (data.success) {
         setIsLoggedIn(true);
         sessionStorage.setItem('adminAuth', 'true');
+        sessionStorage.setItem('adminToken', data.token);
         setLoginError('');
       } else {
         setLoginError('Invalid password. Please try again.');
@@ -101,6 +103,7 @@ const AdminDashboard = ({ onLogout }) => {
     setIsLoggedIn(false);
     setPassword(''); // Clear the password field
     sessionStorage.removeItem('adminAuth');
+    sessionStorage.removeItem('adminToken');
     if (onLogout) onLogout();
   };
 
@@ -109,7 +112,10 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const res = await fetch(`${API_URL}/settings`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
         body: JSON.stringify(siteSettings)
       });
       if (res.ok) {
@@ -129,7 +135,10 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
         body: JSON.stringify(newDoctor)
       });
       if (res.ok) {
@@ -147,7 +156,10 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
         body: JSON.stringify(newImage)
       });
       if (res.ok) {
@@ -165,7 +177,10 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
         body: JSON.stringify(newReview)
       });
       if (res.ok) {
@@ -183,7 +198,10 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
         body: JSON.stringify(newInsurance)
       });
       if (res.ok) {
@@ -197,7 +215,10 @@ const AdminDashboard = ({ onLogout }) => {
   const handleDelete = async (type, id) => {
     if (!window.confirm(`Are you sure you want to remove this ${type}?`)) return;
     try {
-      await fetch(`${API_URL}/${type === 'insurance' ? 'insurance' : (type === 'departments' ? 'departments' : type)}/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/${type === 'insurance' ? 'insurance' : (type === 'departments' ? 'departments' : type)}/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': sessionStorage.getItem('adminToken') }
+      });
       fetchData();
     } catch (err) { console.error(err); }
   };
@@ -207,7 +228,10 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const res = await fetch(`${API_URL}/departments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
         body: JSON.stringify(newDepartment)
       });
       if (res.ok) {
@@ -221,7 +245,10 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       await fetch(`${API_URL}/appointments/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
         body: JSON.stringify({ status })
       });
       fetchData();
@@ -373,7 +400,10 @@ const AdminDashboard = ({ onLogout }) => {
                               if (e.target.value === app.doctorNotes) return;
                               await fetch(`${API_URL}/appointments/${app.id}/notes`, {
                                 method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: { 
+                                  'Content-Type': 'application/json',
+                                  'Authorization': sessionStorage.getItem('adminToken')
+                                },
                                 body: JSON.stringify({ notes: e.target.value })
                               });
                               fetchData();

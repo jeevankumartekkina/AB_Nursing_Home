@@ -72,7 +72,8 @@ const settingsSchema = new mongoose.Schema({
   twilioSid: String,
   twilioAuthToken: String,
   twilioFrom: String,
-  whatsappNumber: String
+  whatsappNumber: String,
+  adminToken: String
 });
 settingsSchema.set('toJSON', { virtuals: true });
 const Settings = mongoose.model('Settings', settingsSchema);
@@ -111,7 +112,14 @@ mongoose.connect(MONGODB_URI)
 
     // Seed initial settings
     if (await Settings.countDocuments() === 0) {
-      await Settings.create({ notificationEmail: '', adminPassword: 'admin123', contactPhone: '09573687858', senderEmail: '', senderAppPassword: '' });
+      await Settings.create({ 
+        notificationEmail: '', 
+        adminPassword: 'admin123', 
+        contactPhone: '09573687858', 
+        senderEmail: '', 
+        senderAppPassword: '',
+        adminToken: Math.random().toString(36).substring(2) + Date.now().toString(36)
+      });
     }
 
     // Seed initial departments
@@ -129,6 +137,17 @@ app.use(express.static(path.join(__dirname, '../dist')));
 
 // --- API ENDPOINTS ---
 
+// Auth Middleware to protect admin routes
+const authenticate = async (req, res, next) => {
+  const token = req.headers['authorization'];
+  const settings = await Settings.findOne();
+  if (settings && settings.adminToken === token) {
+    next();
+  } else {
+    res.status(403).json({ error: 'Unauthorized' });
+  }
+};
+
 app.post('/api/login', async (req, res) => {
   try {
     const { password } = req.body;
@@ -138,18 +157,18 @@ app.post('/api/login', async (req, res) => {
     }
     const settings = await Settings.findOne();
     if (settings && settings.adminPassword === password) {
-      res.json({ success: true });
+      res.json({ success: true, token: settings.adminToken });
     } else {
       res.status(401).json({ success: false, message: 'Invalid password' });
     }
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/settings', async (req, res) => {
+app.get('/api/settings', authenticate, async (req, res) => {
   try { res.json(await Settings.findOne()); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.put('/api/settings', async (req, res) => {
+app.put('/api/settings', authenticate, async (req, res) => {
   try { res.json(await Settings.findOneAndUpdate({}, req.body, { new: true, upsert: true })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -157,11 +176,11 @@ app.get('/api/insurance', async (req, res) => {
   try { res.json(await Insurance.find()); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/insurance', async (req, res) => {
+app.post('/api/insurance', authenticate, async (req, res) => {
   try { const n = new Insurance(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/insurance/:id', async (req, res) => {
+app.delete('/api/insurance/:id', authenticate, async (req, res) => {
   try { await Insurance.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -169,11 +188,11 @@ app.get('/api/departments', async (req, res) => {
   try { res.json(await Department.find()); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/departments', async (req, res) => {
+app.post('/api/departments', authenticate, async (req, res) => {
   try { const n = new Department(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/departments/:id', async (req, res) => {
+app.delete('/api/departments/:id', authenticate, async (req, res) => {
   try { await Department.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -181,15 +200,15 @@ app.get('/api/doctors', async (req, res) => {
   try { res.json(await Doctor.find()); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/doctors', async (req, res) => {
+app.post('/api/doctors', authenticate, async (req, res) => {
   try { const n = new Doctor(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.put('/api/doctors/:id', async (req, res) => {
+app.put('/api/doctors/:id', authenticate, async (req, res) => {
   try { res.json(await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/doctors/:id', async (req, res) => {
+app.delete('/api/doctors/:id', authenticate, async (req, res) => {
   try { await Doctor.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -197,31 +216,19 @@ app.get('/api/reviews', async (req, res) => {
   try { res.json(await Review.find()); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/reviews', async (req, res) => {
+app.post('/api/reviews', authenticate, async (req, res) => {
   try { const n = new Review(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.put('/api/reviews/:id', async (req, res) => {
+app.put('/api/reviews/:id', authenticate, async (req, res) => {
   try { res.json(await Review.findByIdAndUpdate(req.params.id, req.body, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/reviews/:id', async (req, res) => {
+app.delete('/api/reviews/:id', authenticate, async (req, res) => {
   try { await Review.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/reviews', async (req, res) => {
-  try { res.json(await Review.find()); } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.post('/api/reviews', async (req, res) => {
-  try { const n = new Review(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.delete('/api/reviews/:id', async (req, res) => {
-  try { await Review.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/appointments', async (req, res) => {
+app.get('/api/appointments', authenticate, async (req, res) => {
   try { res.json(await Appointment.find().sort({ createdAt: -1 })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -240,11 +247,11 @@ app.post('/api/appointments', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.patch('/api/appointments/:id/status', async (req, res) => {
+app.patch('/api/appointments/:id/status', authenticate, async (req, res) => {
   try { res.json(await Appointment.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.patch('/api/appointments/:id/notes', async (req, res) => {
+app.patch('/api/appointments/:id/notes', authenticate, async (req, res) => {
   try { res.json(await Appointment.findByIdAndUpdate(req.params.id, { doctorNotes: req.body.notes }, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -252,15 +259,15 @@ app.get('/api/gallery', async (req, res) => {
   try { res.json(await Gallery.find()); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/gallery', async (req, res) => {
+app.post('/api/gallery', authenticate, async (req, res) => {
   try { const n = new Gallery(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.put('/api/gallery/:id', async (req, res) => {
+app.put('/api/gallery/:id', authenticate, async (req, res) => {
   try { res.json(await Gallery.findByIdAndUpdate(req.params.id, req.body, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/gallery/:id', async (req, res) => {
+app.delete('/api/gallery/:id', authenticate, async (req, res) => {
   try { await Gallery.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
