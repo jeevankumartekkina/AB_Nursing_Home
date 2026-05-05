@@ -65,13 +65,26 @@ const AdminDashboard = ({ onLogout }) => {
         fetch(`${API_URL}/settings`, { headers: { 'Authorization': token } }),
         fetch(`${API_URL}/departments`) // Public
       ]);
-      setAppointments(await appRes.json());
-      setDoctors(await docRes.json());
-      setReviews(await revRes.json());
-      setGallery(await galRes.json());
-      setInsurances(await insRes.json());
-      setSiteSettings(await setRes.json());
-      setDepartments(await deptRes.json());
+      
+      if (appRes.status === 403 || setRes.status === 403) {
+        handleLogout();
+        return;
+      }
+      const appData = await appRes.json();
+      const docData = await docRes.json();
+      const revData = await revRes.json();
+      const galData = await galRes.json();
+      const insData = await insRes.json();
+      const setData = await setRes.json();
+      const deptData = await deptRes.json();
+
+      if (Array.isArray(appData)) setAppointments(appData);
+      if (Array.isArray(docData)) setDoctors(docData);
+      if (Array.isArray(revData)) setReviews(revData);
+      if (Array.isArray(galData)) setGallery(galData);
+      if (Array.isArray(insData)) setInsurances(insData);
+      if (setData && !setData.error) setSiteSettings(setData);
+      if (Array.isArray(deptData)) setDepartments(deptData);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -291,8 +304,8 @@ const AdminDashboard = ({ onLogout }) => {
     setShowExportModal(false);
   };
 
-  const pendingAppointments = appointments.filter(a => a.status === 'pending');
-  const completedAppointments = appointments.filter(a => a.status === 'completed');
+  const pendingAppointments = Array.isArray(appointments) ? appointments.filter(a => a.status === 'pending') : [];
+  const completedAppointments = Array.isArray(appointments) ? appointments.filter(a => a.status === 'completed') : [];
   const [appointmentView, setAppointmentView] = useState('pending');
 
   if (!isLoggedIn) {
