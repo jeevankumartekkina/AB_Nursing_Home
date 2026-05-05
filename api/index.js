@@ -17,7 +17,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://Ab_Home:admin123@c
 mongoose.connect(MONGODB_URI)
   .then(async () => {
     console.log('Connected to MongoDB Atlas successfully!');
-    // Seed initial data if empty
+    // Seed initial reviews if empty
     const reviewCount = await Review.countDocuments();
     if (reviewCount === 0) {
       await Review.insertMany([
@@ -26,6 +26,20 @@ mongoose.connect(MONGODB_URI)
         { author: "Umamashwari Emandhi", text: "Excellent service and obedient staff..", rating: 5, time: "a year ago" }
       ]);
       console.log('Seeded initial reviews.');
+    }
+
+    // Seed initial insurances if empty
+    const insuranceCount = await Insurance.countDocuments();
+    if (insuranceCount === 0) {
+      await Insurance.insertMany([
+        { name: "Star Health", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Star+Health" },
+        { name: "Apollo Munich", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Apollo+Munich" },
+        { name: "HDFC ERGO", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=HDFC+ERGO" },
+        { name: "ICICI Lombard", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=ICICI+Lombard" },
+        { name: "Bajaj Allianz", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Bajaj+Allianz" },
+        { name: "Religare", logo: "https://via.placeholder.com/150x60/f0f9ff/0369a1?text=Religare" }
+      ]);
+      console.log('Seeded initial insurances.');
     }
   })
   .catch(err => console.error('MongoDB connection error:', err));
