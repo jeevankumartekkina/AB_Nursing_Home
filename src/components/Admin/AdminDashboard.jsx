@@ -92,6 +92,71 @@ const AdminDashboard = ({ onLogout }) => {
     }
   };
 
+  const [appointmentView, setAppointmentView] = useState('pending');
+
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      const res = await fetch(`${API_URL}/appointments/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
+  const pendingAppointments = appointments.filter(a => a.status === 'pending');
+  const completedAppointments = appointments.filter(a => a.status === 'completed');
+
+  const renderAppointmentsTable = (appts, isPending) => (
+    <div className="admin-table-container glass-panel">
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>Date/Time Requested</th>
+            <th>Patient Name</th>
+            <th>Phone</th>
+            <th>Date Preference</th>
+            <th>Department</th>
+            <th>Message</th>
+            {isPending && <th>Action</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {appts.length === 0 ? (
+            <tr><td colSpan={isPending ? "7" : "6"} className="text-center py-4">No appointments found.</td></tr>
+          ) : (
+            appts.map(app => (
+              <tr key={app.id}>
+                <td>{new Date(app.createdAt).toLocaleString()}</td>
+                <td><strong>{app.name}</strong></td>
+                <td>{app.phone}</td>
+                <td>{app.date}</td>
+                <td>{app.department}</td>
+                <td>{app.message}</td>
+                {isPending && (
+                  <td>
+                    <button 
+                      onClick={() => handleUpdateStatus(app.id, 'completed')}
+                      className="btn btn-primary"
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                    >
+                      Mark Complete
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
     <div className="admin-dashboard">
       <div className="admin-sidebar">
@@ -121,39 +186,30 @@ const AdminDashboard = ({ onLogout }) => {
         {/* APPOINTMENTS TAB */}
         {activeTab === 'appointments' && (
           <div>
-            <div className="admin-header">
-              <h2>Recent Appointments</h2>
+            <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2>Manage Appointments</h2>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button 
+                  className={`btn ${appointmentView === 'pending' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setAppointmentView('pending')}
+                  style={appointmentView !== 'pending' ? { background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)' } : {}}
+                >
+                  Pending Requests ({pendingAppointments.length})
+                </button>
+                <button 
+                  className={`btn ${appointmentView === 'completed' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setAppointmentView('completed')}
+                  style={appointmentView !== 'completed' ? { background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)' } : {}}
+                >
+                  Completed History
+                </button>
+              </div>
             </div>
-            <div className="admin-table-container glass-panel">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Date/Time Requested</th>
-                    <th>Patient Name</th>
-                    <th>Phone</th>
-                    <th>Date Preference</th>
-                    <th>Department</th>
-                    <th>Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.length === 0 ? (
-                    <tr><td colSpan="6" className="text-center py-4">No appointments found.</td></tr>
-                  ) : (
-                    appointments.slice().reverse().map(app => (
-                      <tr key={app.id}>
-                        <td>{new Date(app.createdAt).toLocaleString()}</td>
-                        <td><strong>{app.name}</strong></td>
-                        <td>{app.phone}</td>
-                        <td>{app.date}</td>
-                        <td>{app.department}</td>
-                        <td>{app.message}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+            
+            {appointmentView === 'pending' 
+              ? renderAppointmentsTable(pendingAppointments, true)
+              : renderAppointmentsTable(completedAppointments, false)
+            }
           </div>
         )}
 

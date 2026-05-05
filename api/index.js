@@ -64,6 +64,7 @@ const appointmentSchema = new mongoose.Schema({
   date: String,
   department: String,
   message: String,
+  status: { type: String, default: 'pending' },
   createdAt: { type: Date, default: Date.now }
 });
 appointmentSchema.set('toJSON', { virtuals: true });
@@ -133,6 +134,20 @@ app.post('/api/appointments', async (req, res) => {
     const newAppt = new Appointment(req.body);
     await newAppt.save();
     res.status(201).json(newAppt);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/appointments/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id, 
+      { status }, 
+      { new: true }
+    );
+    res.json(appointment);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
