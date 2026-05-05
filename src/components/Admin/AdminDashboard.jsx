@@ -146,20 +146,33 @@ const AdminDashboard = ({ onLogout }) => {
     const method = editingDoctorId ? 'PUT' : 'POST';
     const url = editingDoctorId ? `${API_URL}/doctors/${editingDoctorId}` : `${API_URL}/doctors`;
     try {
+      // Clean up the object to avoid sending internal IDs to the backend
+      const payload = { ...newDoctor };
+      delete payload._id;
+      delete payload.__v;
+      delete payload.id;
+
       const res = await fetch(url, {
         method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': sessionStorage.getItem('adminToken')
         },
-        body: JSON.stringify(newDoctor)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '', availability: '' });
         setEditingDoctorId(null);
         fetchData();
+        alert(`Doctor ${editingDoctorId ? 'updated' : 'added'} successfully!`);
+      } else {
+        const errData = await res.json();
+        alert(`Error: ${errData.error || 'Operation failed'}`);
       }
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+      console.error(err);
+      alert("System error. Please try again.");
+    }
   };
 
   const handleAddImage = async (e) => {
@@ -167,19 +180,22 @@ const AdminDashboard = ({ onLogout }) => {
     const method = editingImageId ? 'PUT' : 'POST';
     const url = editingImageId ? `${API_URL}/gallery/${editingImageId}` : `${API_URL}/gallery`;
     try {
+      const payload = { ...newImage };
+      delete payload._id; delete payload.__v; delete payload.id;
       const res = await fetch(url, {
         method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': sessionStorage.getItem('adminToken')
         },
-        body: JSON.stringify(newImage)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         setNewImage({ url: '', caption: '' });
         setEditingImageId(null);
         fetchData();
-      }
+        alert('Gallery updated successfully!');
+      } else { alert('Failed to update gallery'); }
     } catch (err) { console.error(err); }
   };
 
@@ -188,19 +204,22 @@ const AdminDashboard = ({ onLogout }) => {
     const method = editingReviewId ? 'PUT' : 'POST';
     const url = editingReviewId ? `${API_URL}/reviews/${editingReviewId}` : `${API_URL}/reviews`;
     try {
+      const payload = { ...newReview };
+      delete payload._id; delete payload.__v; delete payload.id;
       const res = await fetch(url, {
         method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': sessionStorage.getItem('adminToken')
         },
-        body: JSON.stringify(newReview)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         setNewReview({ author: '', text: '', rating: 5, time: '' });
         setEditingReviewId(null);
         fetchData();
-      }
+        alert('Review updated successfully!');
+      } else { alert('Failed to update review'); }
     } catch (err) { console.error(err); }
   };
 
@@ -209,19 +228,22 @@ const AdminDashboard = ({ onLogout }) => {
     const method = editingInsuranceId ? 'PUT' : 'POST';
     const url = editingInsuranceId ? `${API_URL}/insurance/${editingInsuranceId}` : `${API_URL}/insurance`;
     try {
+      const payload = { ...newInsurance };
+      delete payload._id; delete payload.__v; delete payload.id;
       const res = await fetch(url, {
         method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': sessionStorage.getItem('adminToken')
         },
-        body: JSON.stringify(newInsurance)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         setNewInsurance({ name: '', logo: '' });
         setEditingInsuranceId(null);
         fetchData();
-      }
+        alert('Insurance updated successfully!');
+      } else { alert('Failed to update insurance'); }
     } catch (err) { console.error(err); }
   };
 
