@@ -11,8 +11,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// MongoDB Connection URI
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://Ab_Home:admin123@cluster0.sq7te5u.mongodb.net/hospital?retryWrites=true&w=majority';
+// MongoDB Connection URI (Managed via Environment Variables for Security)
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error("CRITICAL: MONGODB_URI is not defined in environment variables!");
+}
 
 // --- Mongoose Models (Defined FIRST to avoid ReferenceErrors during seeding) ---
 
