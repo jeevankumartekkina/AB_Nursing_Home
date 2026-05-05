@@ -181,8 +181,28 @@ app.post('/api/doctors', async (req, res) => {
   try { const n = new Doctor(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.put('/api/doctors/:id', async (req, res) => {
+  try { res.json(await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.delete('/api/doctors/:id', async (req, res) => {
   try { await Doctor.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/reviews', async (req, res) => {
+  try { res.json(await Review.find()); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/reviews', async (req, res) => {
+  try { const n = new Review(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/reviews/:id', async (req, res) => {
+  try { res.json(await Review.findByIdAndUpdate(req.params.id, req.body, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/reviews/:id', async (req, res) => {
+  try { await Review.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get('/api/reviews', async (req, res) => {
@@ -230,6 +250,10 @@ app.get('/api/gallery', async (req, res) => {
 
 app.post('/api/gallery', async (req, res) => {
   try { const n = new Gallery(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/gallery/:id', async (req, res) => {
+  try { res.json(await Gallery.findByIdAndUpdate(req.params.id, req.body, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.delete('/api/gallery/:id', async (req, res) => {
