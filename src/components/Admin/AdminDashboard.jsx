@@ -230,14 +230,14 @@ const AdminDashboard = ({ onLogout }) => {
       <div className="admin-sidebar">
         <div className="admin-logo"><h3>Admin Panel</h3></div>
         <ul className="admin-nav">
-          <li className={activeTab === 'appointments' ? 'active' : ''} onClick={() => setActiveTab('appointments')}><Calendar size={20}/> Appointments</li>
-          <li className={activeTab === 'doctors' ? 'active' : ''} onClick={() => setActiveTab('doctors')}><Users size={20}/> Doctors</li>
-          <li className={activeTab === 'gallery' ? 'active' : ''} onClick={() => setActiveTab('gallery')}><ImageIcon size={20}/> Gallery</li>
-          <li className={activeTab === 'insurance' ? 'active' : ''} onClick={() => setActiveTab('insurance')}><ShieldCheck size={20}/> Insurance</li>
-          <li className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}><MessageSquare size={20}/> Reviews</li>
-          <li className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}><Settings size={20}/> Settings</li>
+          <li className={activeTab === 'appointments' ? 'active' : ''} onClick={() => setActiveTab('appointments')}><Calendar size={20}/> <span>Appointments</span></li>
+          <li className={activeTab === 'doctors' ? 'active' : ''} onClick={() => setActiveTab('doctors')}><Users size={20}/> <span>Doctors</span></li>
+          <li className={activeTab === 'gallery' ? 'active' : ''} onClick={() => setActiveTab('gallery')}><ImageIcon size={20}/> <span>Gallery</span></li>
+          <li className={activeTab === 'insurance' ? 'active' : ''} onClick={() => setActiveTab('insurance')}><ShieldCheck size={20}/> <span>Insurance</span></li>
+          <li className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}><MessageSquare size={20}/> <span>Reviews</span></li>
+          <li className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}><Settings size={20}/> <span>Settings</span></li>
         </ul>
-        <div className="admin-logout" onClick={handleLogout}><LogOut size={20}/> Logout</div>
+        <div className="admin-logout" onClick={handleLogout}><LogOut size={20}/> <span>Logout</span></div>
       </div>
 
       <div className="admin-content">

