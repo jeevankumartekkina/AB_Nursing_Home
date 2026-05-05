@@ -51,6 +51,9 @@ const Doctors = () => {
                   <span className="doctor-qual">{doc.qualification}</span>
                   <span className="doctor-exp">{doc.experience}</span>
                 </div>
+                <div className="doctor-availability mt-3 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)', fontSize: '0.85rem', color: 'var(--primary)' }}>
+                  <strong>Availability:</strong> {doc.availability || 'Available 24/7'}
+                </div>
               </div>
             </div>
           ))}

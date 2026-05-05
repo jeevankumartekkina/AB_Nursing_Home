@@ -12,6 +12,7 @@ const AppointmentForm = () => {
   });
   const [departments, setDepartments] = useState([]);
   const [showToast, setShowToast] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   React.useEffect(() => {
     fetch('/api/departments')
@@ -24,6 +25,32 @@ const AppointmentForm = () => {
       })
       .catch(err => console.error(err));
   }, []);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      // Using a public key for now, you can change this in the code
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=c64468f000305a41a4a6132890989f66`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFormData(prev => ({ ...prev, reportUrl: data.data.url }));
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+      alert("Photo upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -101,13 +128,23 @@ const AppointmentForm = () => {
                 </div>
               </div>
               <div className="form-group">
+                <label>Upload Past Reports / Prescriptions (Optional)</label>
+                <div className="input-wrapper">
+                  <input type="file" accept="image/*" onChange={handleFileUpload} className="form-control" style={{ padding: '8px' }} />
+                  {uploading && <small className="text-white ml-2">Uploading...</small>}
+                  {formData.reportUrl && <small className="text-green ml-2">✓ Uploaded</small>}
+                </div>
+              </div>
+              <div className="form-group">
                 <label>Additional Message (Optional)</label>
                 <div className="input-wrapper align-start">
                   <FileText size={18} className="input-icon textarea-icon" />
                   <textarea name="message" value={formData.message} onChange={handleChange} rows="4" placeholder="Any specific concerns?"></textarea>
                 </div>
               </div>
-              <button type="submit" className="btn btn-primary w-100">Request Appointment</button>
+              <button type="submit" className="btn btn-primary w-100" disabled={uploading}>
+                {uploading ? 'Wait for upload...' : 'Request Appointment'}
+              </button>
             </form>
           </div>
         </div>

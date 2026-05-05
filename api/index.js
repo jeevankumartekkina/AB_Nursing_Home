@@ -17,7 +17,12 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://Ab_Home:admin123@c
 // --- Mongoose Models (Defined FIRST to avoid ReferenceErrors during seeding) ---
 
 const doctorSchema = new mongoose.Schema({
-  name: String, specialty: String, qualification: String, experience: String, image: String
+  name: String, 
+  specialty: String, 
+  qualification: String, 
+  experience: String, 
+  image: String,
+  availability: { type: String, default: 'Mon-Sat: 10AM - 5PM' }
 });
 doctorSchema.set('toJSON', { virtuals: true });
 const Doctor = mongoose.model('Doctor', doctorSchema);
@@ -29,7 +34,13 @@ reviewSchema.set('toJSON', { virtuals: true });
 const Review = mongoose.model('Review', reviewSchema);
 
 const appointmentSchema = new mongoose.Schema({
-  name: String, phone: String, date: String, department: String, message: String,
+  name: String, 
+  phone: String, 
+  date: String, 
+  department: String, 
+  message: String,
+  reportUrl: String,
+  doctorNotes: String,
   status: { type: String, default: 'pending' },
   createdAt: { type: Date, default: Date.now }
 });
@@ -53,7 +64,11 @@ const settingsSchema = new mongoose.Schema({
   adminPassword: { type: String, default: 'admin123' },
   contactPhone: { type: String, default: '09573687858' },
   senderEmail: String,
-  senderAppPassword: String
+  senderAppPassword: String,
+  twilioSid: String,
+  twilioAuthToken: String,
+  twilioFrom: String,
+  whatsappNumber: String
 });
 settingsSchema.set('toJSON', { virtuals: true });
 const Settings = mongoose.model('Settings', settingsSchema);
@@ -203,6 +218,10 @@ app.post('/api/appointments', async (req, res) => {
 
 app.patch('/api/appointments/:id/status', async (req, res) => {
   try { res.json(await Appointment.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.patch('/api/appointments/:id/notes', async (req, res) => {
+  try { res.json(await Appointment.findByIdAndUpdate(req.params.id, { doctorNotes: req.body.notes }, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get('/api/gallery', async (req, res) => {

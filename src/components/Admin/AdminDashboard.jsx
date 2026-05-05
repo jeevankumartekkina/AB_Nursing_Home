@@ -24,12 +24,16 @@ const AdminDashboard = ({ onLogout }) => {
     adminPassword: '',
     contactPhone: '',
     senderEmail: '',
-    senderAppPassword: ''
+    senderAppPassword: '',
+    twilioSid: '',
+    twilioAuthToken: '',
+    twilioFrom: '',
+    whatsappNumber: ''
   });
   
   // Form States
   const [newDepartment, setNewDepartment] = useState({ name: '' });
-  const [newDoctor, setNewDoctor] = useState({ name: '', specialty: '', qualification: '', experience: '', image: '' });
+  const [newDoctor, setNewDoctor] = useState({ name: '', specialty: '', qualification: '', experience: '', image: '', availability: '' });
   const [editingDoctorId, setEditingDoctorId] = useState(null);
   const [newImage, setNewImage] = useState({ url: '', caption: '' });
   const [editingImageId, setEditingImageId] = useState(null);
@@ -129,7 +133,7 @@ const AdminDashboard = ({ onLogout }) => {
         body: JSON.stringify(newDoctor)
       });
       if (res.ok) {
-        setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '' });
+        setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '', availability: '' });
         setEditingDoctorId(null);
         fetchData();
       }
@@ -347,13 +351,36 @@ const AdminDashboard = ({ onLogout }) => {
 
             <div className="admin-table-container glass-panel mt-4">
               <table className="admin-table">
-                <thead><tr><th>Patient</th><th>Phone</th><th>Date</th><th>Dept</th><th>Message</th>{appointmentView === 'pending' && <th>Action</th>}</tr></thead>
+                <thead><tr><th>Patient</th><th>Details</th><th>Message / Reports</th>{appointmentView === 'pending' ? <th>Action</th> : <th>Doctor Notes</th>}</tr></thead>
                 <tbody>
                   {(appointmentView === 'pending' ? pendingAppointments : completedAppointments).map(app => (
                     <tr key={app.id}>
-                      <td><strong>{app.name}</strong><br/><small>{new Date(app.createdAt).toLocaleDateString()}</small></td>
-                      <td>{app.phone}</td><td>{app.date}</td><td>{app.department}</td><td>{app.message}</td>
-                      {appointmentView === 'pending' && <td><button onClick={() => handleUpdateStatus(app.id, 'completed')} className="btn btn-primary btn-sm">Complete</button></td>}
+                      <td><strong>{app.name}</strong><br/><small>{new Date(app.createdAt).toLocaleDateString()}</small><br/>{app.phone}</td>
+                      <td><strong>Date:</strong> {app.date}<br/><strong>Dept:</strong> {app.department}</td>
+                      <td>
+                        <p className="text-sm mb-2">{app.message}</p>
+                        {app.reportUrl && <a href={app.reportUrl} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm">View Report</a>}
+                      </td>
+                      {appointmentView === 'pending' ? (
+                        <td><button onClick={() => handleUpdateStatus(app.id, 'completed')} className="btn btn-primary btn-sm">Complete Appointment</button></td>
+                      ) : (
+                        <td>
+                          <textarea 
+                            className="form-control text-xs" 
+                            placeholder="Add notes/prescription..." 
+                            defaultValue={app.doctorNotes} 
+                            onBlur={async (e) => {
+                              if (e.target.value === app.doctorNotes) return;
+                              await fetch(`${API_URL}/appointments/${app.id}/notes`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ notes: e.target.value })
+                              });
+                              fetchData();
+                            }}
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -395,8 +422,10 @@ const AdminDashboard = ({ onLogout }) => {
                 <input type="text" placeholder="Qualification" className="form-control mb-3" value={newDoctor.qualification} onChange={e => setNewDoctor({...newDoctor, qualification: e.target.value})} required />
                 <input type="text" placeholder="Experience" className="form-control mb-3" value={newDoctor.experience} onChange={e => setNewDoctor({...newDoctor, experience: e.target.value})} required />
                 <input type="text" placeholder="Image URL" className="form-control mb-3" value={newDoctor.image} onChange={e => setNewDoctor({...newDoctor, image: e.target.value})} required />
+                <label className="form-label">Available Hours</label>
+                <input type="text" placeholder="e.g. Mon-Fri: 10AM - 5PM" className="form-control mb-3" value={newDoctor.availability} onChange={e => setNewDoctor({...newDoctor, availability: e.target.value})} />
                 <button type="submit" className="btn btn-primary w-100">{editingDoctorId ? 'Update' : 'Add'}</button>
-                {editingDoctorId && <button onClick={() => {setEditingDoctorId(null); setNewDoctor({name:'',specialty:'',qualification:'',experience:'',image:''})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
+                {editingDoctorId && <button onClick={() => {setEditingDoctorId(null); setNewDoctor({name:'',specialty:'',qualification:'',experience:'',image:'',availability:''})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
               </form>
             </div>
             <div className="glass-panel p-4 overflow-auto">
@@ -516,7 +545,17 @@ const AdminDashboard = ({ onLogout }) => {
                 <input type="email" className="form-control mb-3" value={siteSettings.senderEmail} onChange={e => setSiteSettings({...siteSettings, senderEmail: e.target.value})} />
                 <label className="form-label">Gmail App Password</label>
                 <input type="password" className="form-control mb-3" value={siteSettings.senderAppPassword} onChange={e => setSiteSettings({...siteSettings, senderAppPassword: e.target.value})} />
-                <div className="alert alert-info text-xs">Go to Google Account &gt; Security &gt; 2-Step Verification &gt; App Passwords to get this.</div>
+                <div className="alert alert-info text-xs mb-4">Go to Google Account &gt; Security &gt; 2-Step Verification &gt; App Passwords to get this.</div>
+
+                <h4 className="text-sm font-bold mb-3">SMS & WhatsApp Alerts (Twilio)</h4>
+                <label className="form-label">Twilio SID</label>
+                <input type="text" className="form-control mb-3" value={siteSettings.twilioSid} onChange={e => setSiteSettings({...siteSettings, twilioSid: e.target.value})} />
+                <label className="form-label">Twilio Auth Token</label>
+                <input type="password" className="form-control mb-3" value={siteSettings.twilioAuthToken} onChange={e => setSiteSettings({...siteSettings, twilioAuthToken: e.target.value})} />
+                <label className="form-label">Twilio Phone Number</label>
+                <input type="text" className="form-control mb-3" value={siteSettings.twilioFrom} onChange={e => setSiteSettings({...siteSettings, twilioFrom: e.target.value})} />
+                <label className="form-label">WhatsApp Target Number</label>
+                <input type="text" className="form-control mb-3" value={siteSettings.whatsappNumber} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} />
               </div>
               <button type="submit" className="btn btn-primary px-5 col-span-2">Save All Settings</button>
             </form>
