@@ -283,7 +283,7 @@ const AdminDashboard = ({ onLogout }) => {
                 {editingDoctorId && <button onClick={() => {setEditingDoctorId(null); setNewDoctor({name:'',specialty:'',qualification:'',experience:'',image:''})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
               </form>
             </div>
-            <div className="glass-panel p-4 overflow-auto" style={{maxHeight:'600px'}}>
+            <div className="glass-panel p-4 overflow-auto">
               <h3>Current Doctors</h3>
               {doctors.map(doc => (
                 <div key={doc.id} className="admin-list-item mt-3">
@@ -310,7 +310,7 @@ const AdminDashboard = ({ onLogout }) => {
                 {editingImageId && <button onClick={() => {setEditingImageId(null); setNewImage({url:'',caption:''})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
               </form>
             </div>
-            <div className="glass-panel p-4 overflow-auto" style={{maxHeight:'600px'}}>
+            <div className="glass-panel p-4 overflow-auto">
               <h3>Current Photos</h3>
               {gallery.map(img => (
                 <div key={img.id} className="admin-list-item mt-3">
@@ -337,7 +337,7 @@ const AdminDashboard = ({ onLogout }) => {
                 {editingInsuranceId && <button onClick={() => {setEditingInsuranceId(null); setNewInsurance({name:'',logo:''})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
               </form>
             </div>
-            <div className="glass-panel p-4 overflow-auto" style={{maxHeight:'600px'}}>
+            <div className="glass-panel p-4 overflow-auto">
               <h3>Current Partners</h3>
               {insurances.map(ins => (
                 <div key={ins.id} className="admin-list-item mt-3">
@@ -366,7 +366,7 @@ const AdminDashboard = ({ onLogout }) => {
                 {editingReviewId && <button onClick={() => {setEditingReviewId(null); setNewReview({author:'',text:'',rating:5,time:''})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
               </form>
             </div>
-            <div className="glass-panel p-4 overflow-auto" style={{maxHeight:'600px'}}>
+            <div className="glass-panel p-4 overflow-auto">
               <h3>Current Reviews</h3>
               {reviews.map(rev => (
                 <div key={rev.id} className="admin-list-item mt-3">

@@ -26,7 +26,7 @@
   border-right: 1px solid var(--admin-border);
   padding: 2rem 1.5rem;
   display: flex;
-  flex-col: column;
+  flex-direction: column; /* Fixed typo from flex-col */
   position: fixed;
   height: 100vh;
   z-index: 100;
