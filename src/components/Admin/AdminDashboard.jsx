@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut } from 'lucide-react';
+import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2 } from 'lucide-react';
 import './AdminDashboard.css';
 
 const API_URL = '/api';
@@ -13,9 +13,15 @@ const AdminDashboard = ({ onLogout }) => {
   
   // New Doctor Form State
   const [newDoctor, setNewDoctor] = useState({ name: '', specialty: '', qualification: '', experience: '', image: '' });
+  const [editingDoctorId, setEditingDoctorId] = useState(null);
   
   // New Gallery Form State
   const [newImage, setNewImage] = useState({ url: '', caption: '' });
+  const [editingImageId, setEditingImageId] = useState(null);
+
+  // New Review Form State
+  const [newReview, setNewReview] = useState({ author: '', text: '', rating: 5, time: '' });
+  const [editingReviewId, setEditingReviewId] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -41,18 +47,42 @@ const AdminDashboard = ({ onLogout }) => {
   const handleAddDoctor = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/doctors`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newDoctor)
-      });
-      if (res.ok) {
-        setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '' });
-        fetchData(); // refresh lists
+      if (editingDoctorId) {
+        const res = await fetch(`${API_URL}/doctors/${editingDoctorId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newDoctor)
+        });
+        if (res.ok) {
+          setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '' });
+          setEditingDoctorId(null);
+          fetchData();
+        }
+      } else {
+        const res = await fetch(`${API_URL}/doctors`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newDoctor)
+        });
+        if (res.ok) {
+          setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '' });
+          fetchData();
+        }
       }
     } catch (error) {
-      console.error("Error adding doctor:", error);
+      console.error("Error saving doctor:", error);
     }
+  };
+
+  const handleEditDoctorClick = (doctor) => {
+    setNewDoctor({
+      name: doctor.name,
+      specialty: doctor.specialty,
+      qualification: doctor.qualification,
+      experience: doctor.experience,
+      image: doctor.image
+    });
+    setEditingDoctorId(doctor.id);
   };
 
   const handleDeleteDoctor = async (id) => {
@@ -68,18 +98,39 @@ const AdminDashboard = ({ onLogout }) => {
   const handleAddImage = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/gallery`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newImage)
-      });
-      if (res.ok) {
-        setNewImage({ url: '', caption: '' });
-        fetchData();
+      if (editingImageId) {
+        const res = await fetch(`${API_URL}/gallery/${editingImageId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newImage)
+        });
+        if (res.ok) {
+          setNewImage({ url: '', caption: '' });
+          setEditingImageId(null);
+          fetchData();
+        }
+      } else {
+        const res = await fetch(`${API_URL}/gallery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newImage)
+        });
+        if (res.ok) {
+          setNewImage({ url: '', caption: '' });
+          fetchData();
+        }
       }
     } catch (error) {
-      console.error("Error adding image:", error);
+      console.error("Error saving image:", error);
     }
+  };
+
+  const handleEditImageClick = (image) => {
+    setNewImage({
+      url: image.url,
+      caption: image.caption || ''
+    });
+    setEditingImageId(image.id);
   };
 
   const handleDeleteImage = async (id) => {
@@ -89,6 +140,56 @@ const AdminDashboard = ({ onLogout }) => {
       fetchData();
     } catch (error) {
       console.error("Error deleting image:", error);
+    }
+  };
+
+  const handleAddReview = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingReviewId) {
+        const res = await fetch(`${API_URL}/reviews/${editingReviewId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newReview)
+        });
+        if (res.ok) {
+          setNewReview({ author: '', text: '', rating: 5, time: '' });
+          setEditingReviewId(null);
+          fetchData();
+        }
+      } else {
+        const res = await fetch(`${API_URL}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newReview)
+        });
+        if (res.ok) {
+          setNewReview({ author: '', text: '', rating: 5, time: '' });
+          fetchData();
+        }
+      }
+    } catch (error) {
+      console.error("Error saving review:", error);
+    }
+  };
+
+  const handleEditReviewClick = (review) => {
+    setNewReview({
+      author: review.author,
+      text: review.text,
+      rating: review.rating,
+      time: review.time
+    });
+    setEditingReviewId(review.id);
+  };
+
+  const handleDeleteReview = async (id) => {
+    if(!window.confirm("Are you sure you want to remove this review?")) return;
+    try {
+      await fetch(`${API_URL}/reviews/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting review:", error);
     }
   };
 
@@ -222,7 +323,7 @@ const AdminDashboard = ({ onLogout }) => {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="glass-panel p-4">
-                <h3>Add New Doctor</h3>
+                <h3>{editingDoctorId ? 'Edit Doctor' : 'Add New Doctor'}</h3>
                 <form onSubmit={handleAddDoctor} className="mt-4">
                   <div className="form-group mb-3">
                     <input type="text" placeholder="Full Name" className="form-control" value={newDoctor.name} onChange={e => setNewDoctor({...newDoctor, name: e.target.value})} required />
@@ -239,7 +340,16 @@ const AdminDashboard = ({ onLogout }) => {
                   <div className="form-group mb-3">
                     <input type="text" placeholder="Image URL (e.g. https://...)" className="form-control" value={newDoctor.image} onChange={e => setNewDoctor({...newDoctor, image: e.target.value})} required />
                   </div>
-                  <button type="submit" className="btn btn-primary w-100"><Plus size={18}/> Add Doctor</button>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button type="submit" className="btn btn-primary w-100">
+                      {editingDoctorId ? 'Update Doctor' : <><Plus size={18}/> Add Doctor</>}
+                    </button>
+                    {editingDoctorId && (
+                      <button type="button" className="btn btn-outline w-100" onClick={() => { setEditingDoctorId(null); setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '' }); }}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </form>
               </div>
 
@@ -255,7 +365,10 @@ const AdminDashboard = ({ onLogout }) => {
                           <p style={{fontSize: '0.8rem', color: '#666', margin: 0}}>{doc.specialty}</p>
                         </div>
                       </div>
-                      <button onClick={() => handleDeleteDoctor(doc.id)} className="btn-icon text-danger" title="Delete"><Trash2 size={20}/></button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={() => handleEditDoctorClick(doc)} className="btn-icon" style={{ color: 'var(--primary)' }} title="Edit"><Edit2 size={20}/></button>
+                        <button onClick={() => handleDeleteDoctor(doc.id)} className="btn-icon text-danger" title="Delete"><Trash2 size={20}/></button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -273,7 +386,7 @@ const AdminDashboard = ({ onLogout }) => {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="glass-panel p-4">
-                <h3>Add New Photo</h3>
+                <h3>{editingImageId ? 'Edit Photo' : 'Add New Photo'}</h3>
                 <form onSubmit={handleAddImage} className="mt-4">
                   <div className="form-group mb-3">
                     <input type="text" placeholder="Image URL (e.g. https://...)" className="form-control" value={newImage.url} onChange={e => setNewImage({...newImage, url: e.target.value})} required />
@@ -281,7 +394,16 @@ const AdminDashboard = ({ onLogout }) => {
                   <div className="form-group mb-3">
                     <input type="text" placeholder="Caption (e.g. Modern OT Room)" className="form-control" value={newImage.caption} onChange={e => setNewImage({...newImage, caption: e.target.value})} />
                   </div>
-                  <button type="submit" className="btn btn-primary w-100"><Plus size={18}/> Add Photo</button>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button type="submit" className="btn btn-primary w-100">
+                      {editingImageId ? 'Update Photo' : <><Plus size={18}/> Add Photo</>}
+                    </button>
+                    {editingImageId && (
+                      <button type="button" className="btn btn-outline w-100" onClick={() => { setEditingImageId(null); setNewImage({ url: '', caption: '' }); }}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </form>
               </div>
 
@@ -296,7 +418,10 @@ const AdminDashboard = ({ onLogout }) => {
                           <strong>{img.caption || 'No Caption'}</strong>
                         </div>
                       </div>
-                      <button onClick={() => handleDeleteImage(img.id)} className="btn-icon text-danger" title="Delete"><Trash2 size={20}/></button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={() => handleEditImageClick(img)} className="btn-icon" style={{ color: 'var(--primary)' }} title="Edit"><Edit2 size={20}/></button>
+                        <button onClick={() => handleDeleteImage(img.id)} className="btn-icon text-danger" title="Delete"><Trash2 size={20}/></button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -305,22 +430,61 @@ const AdminDashboard = ({ onLogout }) => {
           </div>
         )}
 
-        {/* REVIEWS TAB (Read Only for now) */}
+        {/* REVIEWS TAB */}
         {activeTab === 'reviews' && (
           <div>
             <div className="admin-header">
-              <h2>Patient Reviews</h2>
-              <p>Reviews are currently managed via Google Reviews.</p>
+              <h2>Manage Patient Reviews</h2>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              {reviews.map(rev => (
-                <div key={rev.id} className="glass-panel p-4">
-                  <strong>{rev.author}</strong>
-                  <div style={{color: '#FFD700', margin: '0.5rem 0'}}>{"★".repeat(rev.rating)}</div>
-                  <p style={{fontSize: '0.9rem'}}>{rev.text}</p>
-                  <small style={{color: '#888'}}>{rev.time}</small>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="glass-panel p-4">
+                <h3>{editingReviewId ? 'Edit Review' : 'Add New Review'}</h3>
+                <form onSubmit={handleAddReview} className="mt-4">
+                  <div className="form-group mb-3">
+                    <input type="text" placeholder="Patient Name" className="form-control" value={newReview.author} onChange={e => setNewReview({...newReview, author: e.target.value})} required />
+                  </div>
+                  <div className="form-group mb-3">
+                    <textarea placeholder="Review Text" className="form-control" value={newReview.text} onChange={e => setNewReview({...newReview, text: e.target.value})} required rows="3" />
+                  </div>
+                  <div className="form-group mb-3">
+                    <input type="number" placeholder="Rating (1-5)" className="form-control" min="1" max="5" value={newReview.rating} onChange={e => setNewReview({...newReview, rating: Number(e.target.value)})} required />
+                  </div>
+                  <div className="form-group mb-3">
+                    <input type="text" placeholder="Time (e.g. 2 days ago)" className="form-control" value={newReview.time} onChange={e => setNewReview({...newReview, time: e.target.value})} required />
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button type="submit" className="btn btn-primary w-100">
+                      {editingReviewId ? 'Update Review' : <><Plus size={18}/> Add Review</>}
+                    </button>
+                    {editingReviewId && (
+                      <button type="button" className="btn btn-outline w-100" onClick={() => { setEditingReviewId(null); setNewReview({ author: '', text: '', rating: 5, time: '' }); }}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+
+              <div className="glass-panel p-4" style={{maxHeight: '600px', overflowY: 'auto'}}>
+                <h3>Current Reviews</h3>
+                <div className="mt-4 flex flex-col gap-3">
+                  {reviews.map(rev => (
+                    <div key={rev.id} className="admin-list-item">
+                      <div className="flex flex-col gap-1" style={{ width: '100%' }}>
+                        <strong>{rev.author}</strong>
+                        <div style={{color: '#FFD700', fontSize: '0.9rem'}}>{"★".repeat(rev.rating)}</div>
+                        <p style={{fontSize: '0.85rem', margin: '0.25rem 0', color: '#555'}}>{rev.text}</p>
+                        <small style={{color: '#888'}}>{rev.time}</small>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-start' }}>
+                        <button onClick={() => handleEditReviewClick(rev)} className="btn-icon" style={{ color: 'var(--primary)' }} title="Edit"><Edit2 size={20}/></button>
+                        <button onClick={() => handleDeleteReview(rev.id)} className="btn-icon text-danger" title="Delete"><Trash2 size={20}/></button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         )}

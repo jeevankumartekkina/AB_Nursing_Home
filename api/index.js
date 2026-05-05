@@ -100,6 +100,15 @@ app.post('/api/doctors', async (req, res) => {
   }
 });
 
+app.put('/api/doctors/:id', async (req, res) => {
+  try {
+    const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedDoctor);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/doctors/:id', async (req, res) => {
   try {
     await Doctor.findByIdAndDelete(req.params.id);
@@ -114,6 +123,34 @@ app.get('/api/reviews', async (req, res) => {
   try {
     const reviews = await Review.find();
     res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/reviews', async (req, res) => {
+  try {
+    const newReview = new Review(req.body);
+    await newReview.save();
+    res.status(201).json(newReview);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/reviews/:id', async (req, res) => {
+  try {
+    const updatedReview = await Review.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedReview);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/reviews/:id', async (req, res) => {
+  try {
+    await Review.findByIdAndDelete(req.params.id);
+    res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -168,6 +205,15 @@ app.post('/api/gallery', async (req, res) => {
     const newImage = new Gallery(req.body);
     await newImage.save();
     res.status(201).json(newImage);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/gallery/:id', async (req, res) => {
+  try {
+    const updatedImage = await Gallery.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedImage);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
