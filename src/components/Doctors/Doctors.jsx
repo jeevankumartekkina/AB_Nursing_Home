@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Link, Phone, Mail, X, Award, GraduationCap, Info } from 'lucide-react';
 import './Doctors.css';
 
