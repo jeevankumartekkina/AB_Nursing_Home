@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, User, ArrowRight, Share2 } from 'lucide-react';
+import { Calendar, User, ArrowRight, Share2, X } from 'lucide-react';
 import './HealthTips.css';
 
 const HealthTips = () => {
   const [tips, setTips] = useState([]);
+  const [selectedTip, setSelectedTip] = useState(null);
 
   useEffect(() => {
     fetch('/api/blogs')
@@ -46,7 +47,7 @@ const HealthTips = () => {
                 <h3>{tip.title}</h3>
                 <p>{tip.content.substring(0, 120)}...</p>
                 <div className="tip-footer">
-                  <button className="read-more">Read More <ArrowRight size={16} /></button>
+                  <button className="read-more" onClick={() => setSelectedTip(tip)}>Read More <ArrowRight size={16} /></button>
                   <button className="share-btn" onClick={() => handleShare(tip)}>
                     <Share2 size={18} />
                   </button>
@@ -56,6 +57,30 @@ const HealthTips = () => {
           ))}
         </div>
       </div>
+
+      {/* Health Tip Modal */}
+      {selectedTip && (
+        <div className="tip-modal-overlay" onClick={() => setSelectedTip(null)}>
+          <div className="tip-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="tip-modal-close" onClick={() => setSelectedTip(null)}><X size={24}/></button>
+            <div className="tip-modal-body">
+              <img src={selectedTip.image || 'https://images.unsplash.com/photo-1505751172107-5739a00723a5?auto=format&fit=crop&q=80&w=800'} alt={selectedTip.title} className="tip-modal-img" />
+              <div className="tip-modal-padding">
+                <div className="tip-category mb-3" style={{position:'static', display:'inline-block'}}>{selectedTip.category}</div>
+                <h2>{selectedTip.title}</h2>
+                <div className="tip-meta my-3">
+                  <span><Calendar size={14} /> {new Date(selectedTip.createdAt).toLocaleDateString()}</span>
+                  <span><User size={14} /> {selectedTip.author}</span>
+                </div>
+                <div className="tip-full-content">
+                  {selectedTip.content.split('\n').map((para, i) => <p key={i}>{para}</p>)}
+                </div>
+                <button className="btn btn-primary mt-4 w-100" onClick={() => handleShare(selectedTip)}>Share this Tip on WhatsApp</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
