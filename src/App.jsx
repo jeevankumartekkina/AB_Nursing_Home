@@ -13,6 +13,7 @@ import Doctors from './components/Doctors/Doctors';
 import Testimonials from './components/Testimonials/Testimonials';
 import Gallery from './components/Gallery/Gallery';
 import Insurance from './components/Insurance/Insurance';
+import HealthTips from './components/HealthTips/HealthTips';
 import AppointmentForm from './components/AppointmentForm/AppointmentForm';
 import FAQ from './components/FAQ/FAQ';
 import Contact from './components/Contact/Contact';
@@ -54,6 +55,7 @@ const MainSite = () => {
         <Facilities />
         <Gallery />
         <Doctors />
+        <HealthTips />
         <Testimonials />
         <Insurance />
         <AppointmentForm />

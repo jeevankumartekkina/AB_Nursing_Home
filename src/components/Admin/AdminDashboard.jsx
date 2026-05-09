@@ -44,6 +44,9 @@ const AdminDashboard = ({ onLogout }) => {
   const [campaigns, setCampaigns] = useState([]);
   const [newCampaign, setNewCampaign] = useState({ title: '', description: '', image: '', isActive: true, buttonText: 'Book Now' });
   const [editingCampaignId, setEditingCampaignId] = useState(null);
+  const [blogs, setBlogs] = useState([]);
+  const [newBlog, setNewBlog] = useState({ title: '', content: '', image: '', category: 'General Health' });
+  const [editingBlogId, setEditingBlogId] = useState(null);
 
   useEffect(() => {
     const auth = sessionStorage.getItem('adminAuth');
@@ -59,7 +62,7 @@ const AdminDashboard = ({ onLogout }) => {
   const fetchData = async () => {
     const token = sessionStorage.getItem('adminToken');
     try {
-      const [appRes, docRes, revRes, galRes, insRes, setRes, deptRes, camRes] = await Promise.all([
+      const [appRes, docRes, revRes, galRes, insRes, setRes, deptRes, camRes, blogRes] = await Promise.all([
         fetch(`${API_URL}/appointments`, { headers: { 'Authorization': token } }),
         fetch(`${API_URL}/doctors`), // Public
         fetch(`${API_URL}/reviews`), // Public
@@ -67,7 +70,8 @@ const AdminDashboard = ({ onLogout }) => {
         fetch(`${API_URL}/insurance`), // Public
         fetch(`${API_URL}/settings`, { headers: { 'Authorization': token } }),
         fetch(`${API_URL}/departments`), // Public
-        fetch(`${API_URL}/campaigns`) // Public
+        fetch(`${API_URL}/campaigns`), // Public
+        fetch(`${API_URL}/blogs`) // Public
       ]);
       
       if (appRes.status === 403 || setRes.status === 403) {
@@ -82,6 +86,7 @@ const AdminDashboard = ({ onLogout }) => {
       const setData = await setRes.json();
       const deptData = await deptRes.json();
       const camData = await camRes.json();
+      const blogData = await blogRes.json();
 
       if (Array.isArray(appData)) setAppointments(appData);
       if (Array.isArray(docData)) setDoctors(docData);
@@ -91,9 +96,34 @@ const AdminDashboard = ({ onLogout }) => {
       if (setData && !setData.error) setSiteSettings(setData);
       if (Array.isArray(deptData)) setDepartments(deptData);
       if (Array.isArray(camData)) setCampaigns(camData);
+      if (Array.isArray(blogData)) setBlogs(blogData);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+  };
+
+  const handleAddBlog = async (e) => {
+    e.preventDefault();
+    const method = editingBlogId ? 'PUT' : 'POST';
+    const url = editingBlogId ? `${API_URL}/blogs/${editingBlogId}` : `${API_URL}/blogs`;
+    try {
+      const payload = { ...newBlog };
+      delete payload._id; delete payload.__v; delete payload.id;
+      const res = await fetch(url, {
+        method,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setNewBlog({ title: '', content: '', image: '', category: 'General Health' });
+        setEditingBlogId(null);
+        fetchData();
+        alert('Health Tip updated successfully!');
+      } else { alert('Failed to update Health Tip'); }
+    } catch (err) { console.error(err); }
   };
 
   const handleAddCampaign = async (e) => {
@@ -391,6 +421,7 @@ const AdminDashboard = ({ onLogout }) => {
           <li className={activeTab === 'insurance' ? 'active' : ''} onClick={() => setActiveTab('insurance')}><ShieldCheck size={20}/> <span>Insurance</span></li>
           <li className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}><MessageSquare size={20}/> <span>Reviews</span></li>
           <li className={activeTab === 'campaigns' ? 'active' : ''} onClick={() => setActiveTab('campaigns')}><Megaphone size={20}/> <span>Campaigns</span></li>
+          <li className={activeTab === 'blogs' ? 'active' : ''} onClick={() => setActiveTab('blogs')}><FileText size={20}/> <span>Health Tips</span></li>
           <li className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}><Settings size={20}/> <span>Settings</span></li>
         </ul>
         <div className="admin-logout" onClick={handleLogout}><LogOut size={20}/> <span>Logout</span></div>
@@ -651,6 +682,38 @@ const AdminDashboard = ({ onLogout }) => {
                   <div className="flex gap-2">
                     <button onClick={() => {setNewCampaign(cam); setEditingCampaignId(cam.id)}} className="btn-icon"><Edit2 size={18}/></button>
                     <button onClick={() => handleDelete('campaigns', cam.id)} className="btn-icon text-danger"><Trash2 size={18}/></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+ 
+        {/* BLOGS / HEALTH TIPS */}
+        {activeTab === 'blogs' && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="glass-panel p-4">
+              <h3>{editingBlogId ? 'Edit Health Tip' : 'Add New Health Tip'}</h3>
+              <form onSubmit={handleAddBlog} className="mt-4">
+                <input type="text" placeholder="Title (e.g. 5 Tips for a Healthy Heart)" className="form-control mb-3" value={newBlog.title} onChange={e => setNewBlog({...newBlog, title: e.target.value})} required />
+                <input type="text" placeholder="Category (e.g. Cardiology, Wellness)" className="form-control mb-3" value={newBlog.category} onChange={e => setNewBlog({...newBlog, category: e.target.value})} />
+                <textarea placeholder="Content / Details" className="form-control mb-3" rows="6" value={newBlog.content} onChange={e => setNewBlog({...newBlog, content: e.target.value})} required />
+                <input type="text" placeholder="Cover Image URL" className="form-control mb-3" value={newBlog.image} onChange={e => setNewBlog({...newBlog, image: e.target.value})} />
+                <button type="submit" className="btn btn-primary w-100">{editingBlogId ? 'Update' : 'Add'}</button>
+                {editingBlogId && <button onClick={() => {setEditingBlogId(null); setNewBlog({title:'',content:'',image:'',category:'General Health'})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
+              </form>
+            </div>
+            <div className="glass-panel p-4 overflow-auto">
+              <h3>Current Health Tips</h3>
+              {blogs.map(blog => (
+                <div key={blog.id} className="admin-list-item mt-3">
+                  <div>
+                    <strong>{blog.title}</strong>
+                    <p className="text-xs text-muted">{blog.category}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => {setNewBlog(blog); setEditingBlogId(blog.id)}} className="btn-icon"><Edit2 size={18}/></button>
+                    <button onClick={() => handleDelete('blogs', blog.id)} className="btn-icon text-danger"><Trash2 size={18}/></button>
                   </div>
                 </div>
               ))}

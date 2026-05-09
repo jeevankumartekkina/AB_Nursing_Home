@@ -90,6 +90,17 @@ const campaignSchema = new mongoose.Schema({
 campaignSchema.set('toJSON', { virtuals: true });
 const Campaign = mongoose.model('Campaign', campaignSchema);
 
+const blogSchema = new mongoose.Schema({
+  title: String,
+  content: String,
+  image: String,
+  category: { type: String, default: 'General Health' },
+  author: { type: String, default: 'Archana Bhaskara Hospital' },
+  createdAt: { type: Date, default: Date.now }
+});
+blogSchema.set('toJSON', { virtuals: true });
+const Blog = mongoose.model('Blog', blogSchema);
+
 const departmentSchema = new mongoose.Schema({
   name: String
 });
@@ -383,6 +394,22 @@ app.put('/api/campaigns/:id', authenticate, async (req, res) => {
 
 app.delete('/api/campaigns/:id', authenticate, async (req, res) => {
   try { await Campaign.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/blogs', async (req, res) => {
+  try { res.json(await Blog.find().sort({ createdAt: -1 })); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/blogs', authenticate, async (req, res) => {
+  try { const n = new Blog(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/blogs/:id', authenticate, async (req, res) => {
+  try { res.json(await Blog.findByIdAndUpdate(req.params.id, req.body, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/blogs/:id', authenticate, async (req, res) => {
+  try { await Blog.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 if (process.env.NODE_ENV !== 'production') {
