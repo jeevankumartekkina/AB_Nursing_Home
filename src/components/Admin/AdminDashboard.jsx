@@ -78,15 +78,15 @@ const AdminDashboard = ({ onLogout }) => {
         handleLogout();
         return;
       }
-      const appData = await appRes.json();
-      const docData = await docRes.json();
-      const revData = await revRes.json();
-      const galData = await galRes.json();
-      const insData = await insRes.json();
-      const setData = await setRes.json();
-      const deptData = await deptRes.json();
-      const camData = await camRes.json();
-      const blogData = await blogRes.json();
+      const appData = appRes.ok ? await appRes.json() : [];
+      const docData = docRes.ok ? await docRes.json() : [];
+      const revData = revRes.ok ? await revRes.json() : [];
+      const galData = galRes.ok ? await galRes.json() : [];
+      const insData = insRes.ok ? await insRes.json() : [];
+      const setData = setRes.ok ? await setRes.json() : {};
+      const deptData = deptRes.ok ? await deptRes.json() : [];
+      const camData = camRes.ok ? await camRes.json() : [];
+      const blogData = blogRes.ok ? await blogRes.json() : [];
 
       if (Array.isArray(appData)) setAppointments(appData);
       if (Array.isArray(docData)) setDoctors(docData);

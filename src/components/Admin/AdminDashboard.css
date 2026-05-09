@@ -24,20 +24,21 @@
   background: var(--admin-sidebar-bg);
   backdrop-filter: blur(10px);
   border-right: 1px solid var(--admin-border);
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1rem;
   display: flex;
-  flex-direction: column; /* Fixed typo from flex-col */
+  flex-direction: column;
   position: fixed;
   height: 100vh;
   z-index: 100;
   transition: all 0.3s ease;
+  overflow-y: auto; /* Enable scrolling */
 }
 
 .admin-logo h3 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: var(--admin-primary);
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
   letter-spacing: -0.5px;
 }
 
