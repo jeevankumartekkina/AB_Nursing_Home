@@ -50,14 +50,20 @@ const AIAssistant = () => {
 
     setTimeout(() => {
       let botResponse = "I'm not sure about that. Would you like to speak with our reception desk?";
-      const lowerText = text.toLowerCase();
+      const lowerText = text.toLowerCase().trim();
 
-      // Check Greetings
-      if (responses.greetings.some(g => lowerText.includes(g))) {
-        botResponse = "Hello! I can help you find a department or answer questions about our hospital. What's on your mind?";
+      // Check for Affirmative (Yes, Yeah, OK)
+      const yesWords = ["yes", "yeah", "ok", "sure", "yep", "y"];
+      const lastBotMsg = messages[messages.length - 1];
+      
+      if (yesWords.includes(lowerText) && lastBotMsg?.text.includes("speak with our reception")) {
+        botResponse = "Great! You can click the green call button at the bottom right, or call us directly at +91 88888 88888. Our team is ready to help you.";
+      }
+      else if (responses.greetings.some(g => lowerText.includes(g))) {
+        botResponse = "Hello! I am Archana AI. I can help you find the right doctor or answer questions about our hospital. What can I do for you?";
       } 
-      // Check Departments
       else {
+        // Check Departments with more keywords
         let foundDept = null;
         for (const [key, value] of Object.entries(responses.departments)) {
           if (lowerText.includes(key)) {
@@ -65,16 +71,19 @@ const AIAssistant = () => {
             break;
           }
         }
+        
         if (foundDept) {
-          botResponse = `For your concern, I recommend our ${foundDept} department. Our specialists there are highly experienced. Would you like to book an appointment?`;
+          botResponse = `It sounds like you might need our ${foundDept} department. We have specialized doctors for this. Would you like to see our doctors or book an appointment?`;
         } else {
-          // Check General
+          // Check General info
+          let foundGeneral = null;
           for (const [key, value] of Object.entries(responses.general)) {
             if (lowerText.includes(key)) {
-              botResponse = value;
+              foundGeneral = value;
               break;
             }
           }
+          if (foundGeneral) botResponse = foundGeneral;
         }
       }
 
