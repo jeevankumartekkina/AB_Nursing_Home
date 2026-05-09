@@ -20,6 +20,7 @@ import Contact from './components/Contact/Contact';
 import Footer from './components/Footer/Footer';
 import FloatingCallButton from './components/FAB/FloatingCallButton';
 import CampaignBanner from './components/CampaignBanner/CampaignBanner';
+import AIAssistant from './components/AIAssistant/AIAssistant';
 
 // Admin Components
 import AdminDashboard from './components/Admin/AdminDashboard';
@@ -64,6 +65,7 @@ const MainSite = () => {
       </main>
       <Footer />
       <FloatingCallButton />
+      <AIAssistant />
       <Analytics />
     </div>
   );
