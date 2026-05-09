@@ -247,6 +247,17 @@ app.delete('/api/doctors/:id', authenticate, async (req, res) => {
   try { await Doctor.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/api/settings/public', async (req, res) => {
+  try {
+    const s = await Settings.findOne();
+    if (s) {
+      res.json({ contactPhone: s.contactPhone });
+    } else {
+      res.json({ contactPhone: '' });
+    }
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get('/api/reviews', async (req, res) => {
   try { res.json(await Review.find()); } catch (err) { res.status(500).json({ error: err.message }); }
 });

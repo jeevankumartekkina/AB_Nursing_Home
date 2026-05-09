@@ -9,7 +9,15 @@ const AIAssistant = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [siteSettings, setSiteSettings] = useState(null);
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/settings/public')
+      .then(res => res.json())
+      .then(data => setSiteSettings(data))
+      .catch(err => console.error("Error fetching settings:", err));
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,7 +65,8 @@ const AIAssistant = () => {
       const lastBotMsg = messages[messages.length - 1];
       
       if (yesWords.includes(lowerText) && lastBotMsg?.text.includes("speak with our reception")) {
-        botResponse = "Great! You can click the green call button at the bottom right, or call us directly at +91 88888 88888. Our team is ready to help you.";
+        const phone = siteSettings?.contactPhone || "our reception desk";
+        botResponse = `Great! You can click the green call button at the bottom right, or call us directly at ${phone}. Our team is ready to help you.`;
       }
       else if (responses.greetings.some(g => lowerText.includes(g))) {
         botResponse = "Hello! I am Archana AI. I can help you find the right doctor or answer questions about our hospital. What can I do for you?";
@@ -166,7 +175,7 @@ const AIAssistant = () => {
 
         <div className="ai-footer-call">
           <span>Need immediate help?</span>
-          <a href="tel:+918888888888" className="ai-call-link">
+          <a href={`tel:${siteSettings?.contactPhone}`} className="ai-call-link">
             <Phone size={14} /> Call Reception
           </a>
         </div>
