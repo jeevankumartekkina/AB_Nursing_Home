@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2, Settings, Lock, Mail, Phone, Image as ImageIcon, ShieldCheck, Download, Filter, X, Megaphone } from 'lucide-react';
+import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2, Settings, Lock, Mail, Phone, Image as ImageIcon, ShieldCheck, Download, Filter, X, Megaphone, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import './AdminDashboard.css';
 
