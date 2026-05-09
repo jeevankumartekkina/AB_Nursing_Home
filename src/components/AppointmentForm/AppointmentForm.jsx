@@ -111,10 +111,10 @@ const AppointmentForm = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label>Email Address</label>
+                <label>Email Address (Optional)</label>
                 <div className="input-wrapper">
                   <Mail size={18} className="input-icon" />
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Enter your email for confirmations" />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="To receive email confirmation" />
                 </div>
               </div>
               <div className="form-grid">
