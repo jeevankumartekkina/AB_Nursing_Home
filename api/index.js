@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
+import twilio from 'twilio';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -240,6 +241,21 @@ app.delete('/api/reviews/:id', authenticate, async (req, res) => {
   try { await Review.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// --- HELPERS ---
+const sendWhatsApp = async (to, body, s) => {
+  if (s && s.twilioSid && s.twilioAuthToken && s.twilioFrom) {
+    try {
+      const client = twilio(s.twilioSid, s.twilioAuthToken);
+      await client.messages.create({
+        body: body,
+        from: `whatsapp:${s.twilioFrom}`,
+        to: `whatsapp:${to}`
+      });
+      console.log("WhatsApp sent to", to);
+    } catch (err) { console.error("Twilio Error:", err.message); }
+  }
+};
+
 app.get('/api/appointments', authenticate, async (req, res) => {
   try { res.json(await Appointment.find().sort({ createdAt: -1 })); } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -248,6 +264,8 @@ app.post('/api/appointments', async (req, res) => {
   try {
     const n = new Appointment(req.body); await n.save();
     const s = await Settings.findOne();
+    
+    // 1. Email Alert to Hospital
     if (s && s.notificationEmail && s.senderEmail && s.senderAppPassword) {
       const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: s.senderEmail, pass: s.senderAppPassword } });
       await transporter.sendMail({
@@ -255,7 +273,42 @@ app.post('/api/appointments', async (req, res) => {
         text: `New appointment: \nName: ${n.name}\nPhone: ${n.phone}\nDate: ${n.date}\nDept: ${n.department}\nMessage: ${n.message}`
       });
     }
+
+    // 2. WhatsApp Confirmation to Patient
+    const patientBody = `Hello ${n.name}, your appointment at Archana Bhaskara Hospital for ${n.date} (${n.department}) has been requested. We will contact you shortly to confirm.`;
+    await sendWhatsApp(n.phone, patientBody, s);
+
+    // 3. WhatsApp Alert to Admin (If configured)
+    if (s && s.whatsappNumber) {
+      const adminBody = `New Appointment Alert!\nPatient: ${n.name}\nPhone: ${n.phone}\nDate: ${n.date}\nDept: ${n.department}`;
+      await sendWhatsApp(s.whatsappNumber, adminBody, s);
+    }
+
     res.status(201).json(n);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// CRON Endpoint (Call this daily to send follow-ups)
+app.get('/api/cron/followup', async (req, res) => {
+  try {
+    const s = await Settings.findOne();
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const startOfDay = new Date(threeDaysAgo.setHours(0,0,0,0));
+    const endOfDay = new Date(threeDaysAgo.setHours(23,59,59,999));
+
+    // Find appointments from exactly 3 days ago
+    const pastAppointments = await Appointment.find({
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+      status: 'completed'
+    });
+
+    for (const app of pastAppointments) {
+      const msg = `Hello ${app.name}, we hope you are feeling better! It's been 3 days since your visit to Archana Bhaskara Hospital. We would love to hear your feedback. Please leave us a review here: https://your-google-review-link.com`;
+      await sendWhatsApp(app.phone, msg, s);
+    }
+
+    res.json({ success: true, count: pastAppointments.length });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
