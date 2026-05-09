@@ -18,6 +18,7 @@ import FAQ from './components/FAQ/FAQ';
 import Contact from './components/Contact/Contact';
 import Footer from './components/Footer/Footer';
 import FloatingCallButton from './components/FAB/FloatingCallButton';
+import CampaignBanner from './components/CampaignBanner/CampaignBanner';
 
 // Admin Components
 import AdminDashboard from './components/Admin/AdminDashboard';
@@ -44,6 +45,7 @@ const MainSite = () => {
 
   return (
     <div className="app-container">
+      <CampaignBanner />
       <Navbar />
       <main>
         <Hero />

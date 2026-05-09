@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2, Settings, Lock, Mail, Phone, Image as ImageIcon, ShieldCheck, Download, Filter, X } from 'lucide-react';
+import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2, Settings, Lock, Mail, Phone, Image as ImageIcon, ShieldCheck, Download, Filter, X, Megaphone } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import './AdminDashboard.css';
 
@@ -41,6 +41,9 @@ const AdminDashboard = ({ onLogout }) => {
   const [editingReviewId, setEditingReviewId] = useState(null);
   const [newInsurance, setNewInsurance] = useState({ name: '', logo: '' });
   const [editingInsuranceId, setEditingInsuranceId] = useState(null);
+  const [campaigns, setCampaigns] = useState([]);
+  const [newCampaign, setNewCampaign] = useState({ title: '', description: '', image: '', isActive: true, buttonText: 'Book Now' });
+  const [editingCampaignId, setEditingCampaignId] = useState(null);
 
   useEffect(() => {
     const auth = sessionStorage.getItem('adminAuth');
@@ -56,14 +59,15 @@ const AdminDashboard = ({ onLogout }) => {
   const fetchData = async () => {
     const token = sessionStorage.getItem('adminToken');
     try {
-      const [appRes, docRes, revRes, galRes, insRes, setRes, deptRes] = await Promise.all([
+      const [appRes, docRes, revRes, galRes, insRes, setRes, deptRes, camRes] = await Promise.all([
         fetch(`${API_URL}/appointments`, { headers: { 'Authorization': token } }),
         fetch(`${API_URL}/doctors`), // Public
         fetch(`${API_URL}/reviews`), // Public
         fetch(`${API_URL}/gallery`), // Public
         fetch(`${API_URL}/insurance`), // Public
         fetch(`${API_URL}/settings`, { headers: { 'Authorization': token } }),
-        fetch(`${API_URL}/departments`) // Public
+        fetch(`${API_URL}/departments`), // Public
+        fetch(`${API_URL}/campaigns`) // Public
       ]);
       
       if (appRes.status === 403 || setRes.status === 403) {
@@ -77,6 +81,7 @@ const AdminDashboard = ({ onLogout }) => {
       const insData = await insRes.json();
       const setData = await setRes.json();
       const deptData = await deptRes.json();
+      const camData = await camRes.json();
 
       if (Array.isArray(appData)) setAppointments(appData);
       if (Array.isArray(docData)) setDoctors(docData);
@@ -85,9 +90,34 @@ const AdminDashboard = ({ onLogout }) => {
       if (Array.isArray(insData)) setInsurances(insData);
       if (setData && !setData.error) setSiteSettings(setData);
       if (Array.isArray(deptData)) setDepartments(deptData);
+      if (Array.isArray(camData)) setCampaigns(camData);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+  };
+
+  const handleAddCampaign = async (e) => {
+    e.preventDefault();
+    const method = editingCampaignId ? 'PUT' : 'POST';
+    const url = editingCampaignId ? `${API_URL}/campaigns/${editingCampaignId}` : `${API_URL}/campaigns`;
+    try {
+      const payload = { ...newCampaign };
+      delete payload._id; delete payload.__v; delete payload.id;
+      const res = await fetch(url, {
+        method,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': sessionStorage.getItem('adminToken')
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setNewCampaign({ title: '', description: '', image: '', isActive: true, buttonText: 'Book Now' });
+        setEditingCampaignId(null);
+        fetchData();
+        alert('Campaign updated successfully!');
+      } else { alert('Failed to update campaign'); }
+    } catch (err) { console.error(err); }
   };
 
   const handleLogin = async (e) => {
@@ -360,6 +390,7 @@ const AdminDashboard = ({ onLogout }) => {
           <li className={activeTab === 'gallery' ? 'active' : ''} onClick={() => setActiveTab('gallery')}><ImageIcon size={20}/> <span>Gallery</span></li>
           <li className={activeTab === 'insurance' ? 'active' : ''} onClick={() => setActiveTab('insurance')}><ShieldCheck size={20}/> <span>Insurance</span></li>
           <li className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}><MessageSquare size={20}/> <span>Reviews</span></li>
+          <li className={activeTab === 'campaigns' ? 'active' : ''} onClick={() => setActiveTab('campaigns')}><Megaphone size={20}/> <span>Campaigns</span></li>
           <li className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}><Settings size={20}/> <span>Settings</span></li>
         </ul>
         <div className="admin-logout" onClick={handleLogout}><LogOut size={20}/> <span>Logout</span></div>
@@ -584,6 +615,42 @@ const AdminDashboard = ({ onLogout }) => {
                   <div className="flex gap-2">
                     <button onClick={() => {setNewReview(rev); setEditingReviewId(rev.id)}} className="btn-icon"><Edit2 size={18}/></button>
                     <button onClick={() => handleDelete('reviews', rev.id)} className="btn-icon text-danger"><Trash2 size={18}/></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+ 
+        {/* CAMPAIGNS */}
+        {activeTab === 'campaigns' && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="glass-panel p-4">
+              <h3>{editingCampaignId ? 'Edit Campaign' : 'Add New Campaign'}</h3>
+              <form onSubmit={handleAddCampaign} className="mt-4">
+                <input type="text" placeholder="Offer Title (e.g. Free Eye Checkup)" className="form-control mb-3" value={newCampaign.title} onChange={e => setNewCampaign({...newCampaign, title: e.target.value})} required />
+                <textarea placeholder="Description" className="form-control mb-3" rows="3" value={newCampaign.description} onChange={e => setNewCampaign({...newCampaign, description: e.target.value})} required />
+                <input type="text" placeholder="Image URL (Optional)" className="form-control mb-3" value={newCampaign.image} onChange={e => setNewCampaign({...newCampaign, image: e.target.value})} />
+                <input type="text" placeholder="Button Text" className="form-control mb-3" value={newCampaign.buttonText} onChange={e => setNewCampaign({...newCampaign, buttonText: e.target.value})} />
+                <div className="flex align-center gap-2 mb-3">
+                  <input type="checkbox" checked={newCampaign.isActive} onChange={e => setNewCampaign({...newCampaign, isActive: e.target.checked})} />
+                  <label>Is Active (Show on Homepage)</label>
+                </div>
+                <button type="submit" className="btn btn-primary w-100">{editingCampaignId ? 'Update' : 'Add'}</button>
+                {editingCampaignId && <button onClick={() => {setEditingCampaignId(null); setNewCampaign({title:'',description:'',image:'',isActive:true,buttonText:'Book Now'})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
+              </form>
+            </div>
+            <div className="glass-panel p-4 overflow-auto">
+              <h3>Current Campaigns</h3>
+              {campaigns.map(cam => (
+                <div key={cam.id} className={`admin-list-item mt-3 ${!cam.isActive ? 'opacity-50' : ''}`}>
+                  <div>
+                    <strong>{cam.title}</strong>
+                    <p className="text-xs text-muted">{cam.isActive ? 'Active' : 'Draft'}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => {setNewCampaign(cam); setEditingCampaignId(cam.id)}} className="btn-icon"><Edit2 size={18}/></button>
+                    <button onClick={() => handleDelete('campaigns', cam.id)} className="btn-icon text-danger"><Trash2 size={18}/></button>
                   </div>
                 </div>
               ))}

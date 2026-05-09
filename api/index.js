@@ -80,6 +80,16 @@ const settingsSchema = new mongoose.Schema({
 settingsSchema.set('toJSON', { virtuals: true });
 const Settings = mongoose.model('Settings', settingsSchema);
 
+const campaignSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  image: String,
+  isActive: { type: Boolean, default: true },
+  buttonText: { type: String, default: 'Book Now' }
+});
+campaignSchema.set('toJSON', { virtuals: true });
+const Campaign = mongoose.model('Campaign', campaignSchema);
+
 const departmentSchema = new mongoose.Schema({
   name: String
 });
@@ -357,6 +367,22 @@ app.put('/api/gallery/:id', authenticate, async (req, res) => {
 
 app.delete('/api/gallery/:id', authenticate, async (req, res) => {
   try { await Gallery.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/campaigns', async (req, res) => {
+  try { res.json(await Campaign.find()); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/campaigns', authenticate, async (req, res) => {
+  try { const n = new Campaign(req.body); await n.save(); res.status(201).json(n); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/campaigns/:id', authenticate, async (req, res) => {
+  try { res.json(await Campaign.findByIdAndUpdate(req.params.id, req.body, { new: true })); } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/campaigns/:id', authenticate, async (req, res) => {
+  try { await Campaign.findByIdAndDelete(req.params.id); res.status(204).send(); } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 if (process.env.NODE_ENV !== 'production') {

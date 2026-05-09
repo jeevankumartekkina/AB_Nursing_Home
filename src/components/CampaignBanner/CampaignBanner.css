@@ -1,0 +1,102 @@
+.campaign-banner {
+  background: linear-gradient(90deg, #1a237e 0%, #311b92 100%);
+  color: white;
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+.campaign-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.campaign-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.campaign-badge {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.campaign-text h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.campaign-text p {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.campaign-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.campaign-btn {
+  background: white;
+  color: #1a237e;
+  padding: 6px 18px;
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.campaign-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+}
+
+.campaign-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.campaign-close:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .campaign-text p {
+    display: none;
+  }
+  .campaign-badge span {
+    display: none;
+  }
+}
