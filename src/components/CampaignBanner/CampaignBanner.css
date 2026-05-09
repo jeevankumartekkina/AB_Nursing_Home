@@ -1,13 +1,23 @@
 .campaign-banner {
-  background: linear-gradient(90deg, #1a237e 0%, #311b92 100%);
+  background: linear-gradient(90deg, #ff6f00 0%, #e65100 100%);
   color: white;
-  padding: 12px 0;
-  position: sticky;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  position: fixed;
   top: 0;
-  z-index: 1000;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  animation: slideDown 0.5s ease-out;
+  left: 0;
+  width: 100%;
+  z-index: 2000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+body.has-banner .navbar {
+  top: 48px;
+}
+
+body.has-banner .app-container {
+  padding-top: 48px;
 }
 
 @keyframes slideDown {
@@ -62,16 +72,17 @@
 
 .campaign-btn {
   background: white;
-  color: #1a237e;
-  padding: 6px 18px;
-  border-radius: 25px;
-  font-weight: 700;
-  font-size: 0.85rem;
+  color: #e65100;
+  padding: 4px 14px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 0.75rem;
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   transition: all 0.3s ease;
+  text-transform: uppercase;
 }
 
 .campaign-btn:hover {

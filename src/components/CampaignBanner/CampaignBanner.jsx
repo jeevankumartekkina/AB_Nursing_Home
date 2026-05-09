@@ -12,11 +12,18 @@ const CampaignBanner = () => {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
-          setCampaigns(data.filter(c => c.isActive));
+          const active = data.filter(c => c.isActive);
+          setCampaigns(active);
+          if (active.length > 0) document.body.classList.add('has-banner');
         }
       })
       .catch(err => console.error("Error fetching campaigns:", err));
   }, []);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    document.body.classList.remove('has-banner');
+  };
 
   if (!isVisible || campaigns.length === 0) return null;
 
@@ -39,7 +46,7 @@ const CampaignBanner = () => {
           <a href="#appointment" className="campaign-btn">
             {current.buttonText} <ArrowRight size={16} />
           </a>
-          <button className="campaign-close" onClick={() => setIsVisible(false)}>
+          <button className="campaign-close" onClick={handleClose}>
             <X size={20} />
           </button>
         </div>
