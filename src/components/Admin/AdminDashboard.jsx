@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2, Settings, Lock, Mail, Phone, Image as ImageIcon, ShieldCheck, Download, Filter, X, Megaphone, FileText } from 'lucide-react';
+import { Users, Calendar, MessageSquare, Plus, Trash2, LogOut, Edit2, Settings, Lock, Mail, Phone, Image as ImageIcon, ShieldCheck, Download, Filter, X, Megaphone, FileText, QrCode } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import './AdminDashboard.css';
 
@@ -33,7 +33,7 @@ const AdminDashboard = ({ onLogout }) => {
   
   // Form States
   const [newDepartment, setNewDepartment] = useState({ name: '' });
-  const [newDoctor, setNewDoctor] = useState({ name: '', specialty: '', qualification: '', experience: '', image: '', availability: '' });
+  const [newDoctor, setNewDoctor] = useState({ name: '', specialty: '', qualification: '', experience: '', image: '', availability: '', bio: '', education: '', awards: '' });
   const [editingDoctorId, setEditingDoctorId] = useState(null);
   const [newImage, setNewImage] = useState({ url: '', caption: '' });
   const [editingImageId, setEditingImageId] = useState(null);
@@ -221,7 +221,7 @@ const AdminDashboard = ({ onLogout }) => {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '', availability: '' });
+        setNewDoctor({ name: '', specialty: '', qualification: '', experience: '', image: '', availability: '', bio: '', education: '', awards: '' });
         setEditingDoctorId(null);
         fetchData();
         alert(`Doctor ${editingDoctorId ? 'updated' : 'added'} successfully!`);
@@ -422,6 +422,7 @@ const AdminDashboard = ({ onLogout }) => {
           <li className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}><MessageSquare size={20}/> <span>Reviews</span></li>
           <li className={activeTab === 'campaigns' ? 'active' : ''} onClick={() => setActiveTab('campaigns')}><Megaphone size={20}/> <span>Campaigns</span></li>
           <li className={activeTab === 'blogs' ? 'active' : ''} onClick={() => setActiveTab('blogs')}><FileText size={20}/> <span>Health Tips</span></li>
+          <li className={activeTab === 'marketing' ? 'active' : ''} onClick={() => setActiveTab('marketing')}><QrCode size={20}/> <span>Marketing</span></li>
           <li className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}><Settings size={20}/> <span>Settings</span></li>
         </ul>
         <div className="admin-logout" onClick={handleLogout}><LogOut size={20}/> <span>Logout</span></div>
@@ -551,8 +552,14 @@ const AdminDashboard = ({ onLogout }) => {
                 <input type="text" placeholder="Image URL" className="form-control mb-3" value={newDoctor.image} onChange={e => setNewDoctor({...newDoctor, image: e.target.value})} required />
                 <label className="form-label">Available Hours</label>
                 <input type="text" placeholder="e.g. Mon-Fri: 10AM - 5PM" className="form-control mb-3" value={newDoctor.availability} onChange={e => setNewDoctor({...newDoctor, availability: e.target.value})} />
+                <label className="form-label">Professional Biography</label>
+                <textarea placeholder="Tell patients about this doctor's expertise..." className="form-control mb-3" rows="3" value={newDoctor.bio} onChange={e => setNewDoctor({...newDoctor, bio: e.target.value})} />
+                <label className="form-label">Education & Training</label>
+                <textarea placeholder="Degrees, Universities..." className="form-control mb-3" rows="2" value={newDoctor.education} onChange={e => setNewDoctor({...newDoctor, education: e.target.value})} />
+                <label className="form-label">Awards & Recognition</label>
+                <input type="text" placeholder="e.g. Best Surgeon 2023" className="form-control mb-3" value={newDoctor.awards} onChange={e => setNewDoctor({...newDoctor, awards: e.target.value})} />
                 <button type="submit" className="btn btn-primary w-100">{editingDoctorId ? 'Update' : 'Add'}</button>
-                {editingDoctorId && <button onClick={() => {setEditingDoctorId(null); setNewDoctor({name:'',specialty:'',qualification:'',experience:'',image:'',availability:''})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
+                {editingDoctorId && <button onClick={() => {setEditingDoctorId(null); setNewDoctor({name:'',specialty:'',qualification:'',experience:'',image:'',availability:'',bio:'',education:'',awards:''})}} className="btn btn-outline w-100 mt-2">Cancel</button>}
               </form>
             </div>
             <div className="glass-panel p-4 overflow-auto">
@@ -754,6 +761,43 @@ const AdminDashboard = ({ onLogout }) => {
               </div>
               <button type="submit" className="btn btn-primary px-5 col-span-2">Save All Settings</button>
             </form>
+          </div>
+        )}
+ 
+        {/* MARKETING - QR CODE GENERATOR */}
+        {activeTab === 'marketing' && (
+          <div className="glass-panel p-4">
+            <h3>QR Code Marketing Suite</h3>
+            <p className="text-muted text-sm mb-4">Generate QR codes for posters and hospital walls to let patients book appointments instantly.</p>
+            
+            <div className="grid grid-cols-3 gap-6">
+              {/* QR for General Website */}
+              <div className="card p-3 text-center border">
+                <h4 className="mb-3">General Booking</h4>
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin)}`} alt="Main QR" className="mx-auto mb-3" style={{width:'150px'}} />
+                <a href={`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.origin)}`} download target="_blank" className="btn btn-outline btn-sm w-100">Download QR</a>
+              </div>
+
+              {/* QR for Specific Doctors */}
+              <div className="card p-3 border col-span-2">
+                <h4 className="mb-3">Doctor-Specific QR Codes</h4>
+                <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-auto pr-2">
+                  {doctors.map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-2 bg-light rounded border">
+                      <div className="flex items-center gap-2">
+                        <img src={doc.image} style={{width:'30px',height:'30px',borderRadius:'50%'}} />
+                        <span className="text-xs font-bold">{doc.name}</span>
+                      </div>
+                      <a href={`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.origin + '/#doctors')}`} target="_blank" className="btn-icon text-primary"><QrCode size={18}/></a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="alert alert-info mt-4">
+              <strong>Marketing Tip:</strong> Print these QR codes and stick them next to the doctor's cabin or at the main reception. Patients can scan them to book follow-ups or learn more about the specialists!
+            </div>
           </div>
         )}
       </div>

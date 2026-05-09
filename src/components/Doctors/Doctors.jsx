@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Link, Phone, Mail } from 'lucide-react';
+import { Link, Phone, Mail, X, Award, GraduationCap, Info } from 'lucide-react';
 import './Doctors.css';
 
 const Doctors = () => {
   const [doctors, setDoctors] = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -35,13 +35,11 @@ const Doctors = () => {
 
         <div className="doctors-grid">
           {doctors.map(doc => (
-            <div className={`doctor-card reveal delay-${doc.delay}`} key={doc.id}>
+            <div className={`doctor-card reveal`} key={doc.id} onClick={() => setSelectedDoctor(doc)} style={{cursor:'pointer'}}>
               <div className="doctor-img-wrapper">
                 <img src={doc.image} alt={doc.name} className="doctor-img" />
-                <div className="doctor-socials glass-panel">
-                  <a href="#"><Link size={18} /></a>
-                  <a href="#"><Phone size={18} /></a>
-                  <a href="#"><Mail size={18} /></a>
+                <div className="doctor-hover-hint">
+                  <Info size={20} /> View Profile
                 </div>
               </div>
               <div className="doctor-info glass-panel">
@@ -52,13 +50,55 @@ const Doctors = () => {
                   <span className="doctor-exp">{doc.experience}</span>
                 </div>
                 <div className="doctor-availability mt-3 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)', fontSize: '0.85rem', color: 'var(--primary)' }}>
-                  <strong>Availability:</strong> {doc.availability || 'Available 24/7'}
+                  <strong>Availability:</strong> {doc.availability || 'Mon-Sat: 10AM - 5PM'}
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Doctor Profile Modal */}
+      {selectedDoctor && (
+        <div className="doc-modal-overlay" onClick={() => setSelectedDoctor(null)}>
+          <div className="doc-modal-content glass-panel" onClick={e => e.stopPropagation()}>
+            <button className="doc-modal-close" onClick={() => setSelectedDoctor(null)}><X size={24}/></button>
+            <div className="doc-modal-grid">
+              <div className="doc-modal-left">
+                <img src={selectedDoctor.image} alt={selectedDoctor.name} />
+                <div className="doc-modal-summary">
+                  <h3>{selectedDoctor.name}</h3>
+                  <p className="text-primary font-bold">{selectedDoctor.specialty}</p>
+                  <p className="text-sm">{selectedDoctor.qualification}</p>
+                  <div className="mt-4 flex gap-2">
+                    <a href="#appointment" onClick={() => setSelectedDoctor(null)} className="btn btn-primary w-100 text-center py-2 text-sm">Book Appointment</a>
+                  </div>
+                </div>
+              </div>
+              <div className="doc-modal-right">
+                <div className="doc-modal-section">
+                  <h4><Info size={18}/> About Doctor</h4>
+                  <p>{selectedDoctor.bio || 'Experienced specialist dedicated to patient care and medical excellence.'}</p>
+                </div>
+                <div className="doc-modal-section">
+                  <h4><GraduationCap size={18}/> Education & Training</h4>
+                  <p>{selectedDoctor.education || 'Top-tier medical education with specialized training in clinical practices.'}</p>
+                </div>
+                {selectedDoctor.awards && (
+                  <div className="doc-modal-section">
+                    <h4><Award size={18}/> Awards & Recognition</h4>
+                    <p>{selectedDoctor.awards}</p>
+                  </div>
+                )}
+                <div className="doc-modal-section">
+                  <h4>🗓️ Availability</h4>
+                  <p>{selectedDoctor.availability || 'Mon-Sat: 10:00 AM - 05:00 PM'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

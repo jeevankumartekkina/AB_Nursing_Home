@@ -15,6 +15,15 @@ const PORT = process.env.PORT || 3001;
 // MongoDB Connection URI (Managed via Environment Variables for Security)
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// Security Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+
 if (!MONGODB_URI) {
   console.error("CRITICAL: MONGODB_URI is not defined in environment variables!");
 }
@@ -27,7 +36,10 @@ const doctorSchema = new mongoose.Schema({
   qualification: String, 
   experience: String, 
   image: String,
-  availability: { type: String, default: 'Mon-Sat: 10AM - 5PM' }
+  availability: { type: String, default: 'Mon-Sat: 10AM - 5PM' },
+  bio: String,
+  education: String,
+  awards: String
 });
 doctorSchema.set('toJSON', { virtuals: true });
 const Doctor = mongoose.model('Doctor', doctorSchema);
@@ -295,7 +307,16 @@ app.get('/api/appointments', authenticate, async (req, res) => {
 
 app.post('/api/appointments', async (req, res) => {
   try {
-    const n = new Appointment(req.body); await n.save();
+    const sanitize = (str) => str ? str.toString().replace(/<[^>]*>?/gm, '') : '';
+    const n = new Appointment({
+      ...req.body,
+      name: sanitize(req.body.name),
+      phone: sanitize(req.body.phone),
+      email: sanitize(req.body.email),
+      department: sanitize(req.body.department),
+      message: sanitize(req.body.message)
+    });
+    await n.save();
     const s = await Settings.findOne();
     
     // 1. Email Alert to Hospital
