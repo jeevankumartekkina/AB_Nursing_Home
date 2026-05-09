@@ -6,6 +6,7 @@ const AppointmentForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     date: '',
     department: '',
     message: ''
@@ -69,7 +70,7 @@ const AppointmentForm = () => {
       if (res.ok) {
         setShowToast(true);
         setTimeout(() => setShowToast(false), 4000);
-        setFormData({ name: '', phone: '', date: '', department: departments[0]?.name || '', message: '' });
+        setFormData({ name: '', phone: '', email: '', date: '', department: departments[0]?.name || '', message: '' });
       }
     } catch (error) {
       console.error('Error submitting appointment:', error);
@@ -102,11 +103,18 @@ const AppointmentForm = () => {
                   <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="Enter your full name" />
                 </div>
               </div>
-              <div className="form-group">
+               <div className="form-group">
                 <label>Phone Number</label>
                 <div className="input-wrapper">
                   <Phone size={18} className="input-icon" />
                   <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required placeholder="Enter your phone number" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Email Address</label>
+                <div className="input-wrapper">
+                  <Mail size={18} className="input-icon" />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Enter your email for confirmations" />
                 </div>
               </div>
               <div className="form-grid">

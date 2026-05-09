@@ -41,6 +41,7 @@ const Review = mongoose.model('Review', reviewSchema);
 const appointmentSchema = new mongoose.Schema({
   name: String, 
   phone: String, 
+  email: String,
   date: String, 
   department: String, 
   message: String,
@@ -268,13 +269,23 @@ app.post('/api/appointments', async (req, res) => {
     // 1. Email Alert to Hospital
     if (s && s.notificationEmail && s.senderEmail && s.senderAppPassword) {
       const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: s.senderEmail, pass: s.senderAppPassword } });
+      
+      // Alert to Hospital
       await transporter.sendMail({
         from: `"Hospital Alert" <${s.senderEmail}>`, to: s.notificationEmail, subject: `New Appointment: ${n.name}`,
-        text: `New appointment: \nName: ${n.name}\nPhone: ${n.phone}\nDate: ${n.date}\nDept: ${n.department}\nMessage: ${n.message}`
+        text: `New appointment: \nName: ${n.name}\nPhone: ${n.phone}\nEmail: ${n.email}\nDate: ${n.date}\nDept: ${n.department}\nMessage: ${n.message}`
       });
+
+      // Confirmation to Patient
+      if (n.email) {
+        await transporter.sendMail({
+          from: `"Archana Bhaskara Hospital" <${s.senderEmail}>`, to: n.email, subject: `Appointment Requested - Archana Bhaskara Hospital`,
+          text: `Hello ${n.name},\n\nThank you for choosing Archana Bhaskara Hospital. We have received your request for an appointment in the ${n.department} department on ${n.date}.\n\nOur team will contact you shortly on ${n.phone} to confirm your slot.\n\nRegards,\nTeam Archana Bhaskara`
+        });
+      }
     }
 
-    // 2. WhatsApp Confirmation to Patient
+    // 2. WhatsApp Confirmation to Patient (Still there if they add Twilio later)
     const patientBody = `Hello ${n.name}, your appointment at Archana Bhaskara Hospital for ${n.date} (${n.department}) has been requested. We will contact you shortly to confirm.`;
     await sendWhatsApp(n.phone, patientBody, s);
 
@@ -297,15 +308,27 @@ app.get('/api/cron/followup', async (req, res) => {
     const startOfDay = new Date(threeDaysAgo.setHours(0,0,0,0));
     const endOfDay = new Date(threeDaysAgo.setHours(23,59,59,999));
 
-    // Find appointments from exactly 3 days ago
     const pastAppointments = await Appointment.find({
       createdAt: { $gte: startOfDay, $lte: endOfDay },
       status: 'completed'
     });
 
+    const transporter = (s && s.senderEmail && s.senderAppPassword) ? 
+      nodemailer.createTransport({ service: 'gmail', auth: { user: s.senderEmail, pass: s.senderAppPassword } }) : null;
+
     for (const app of pastAppointments) {
       const msg = `Hello ${app.name}, we hope you are feeling better! It's been 3 days since your visit to Archana Bhaskara Hospital. We would love to hear your feedback. Please leave us a review here: https://your-google-review-link.com`;
+      
+      // WhatsApp (If credentials exist)
       await sendWhatsApp(app.phone, msg, s);
+      
+      // Email (Free via Gmail)
+      if (transporter && app.email) {
+        await transporter.sendMail({
+          from: `"Archana Bhaskara Hospital" <${s.senderEmail}>`, to: app.email, subject: `How are you feeling? - Archana Bhaskara Hospital`,
+          text: msg
+        });
+      }
     }
 
     res.json({ success: true, count: pastAppointments.length });
